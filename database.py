@@ -288,6 +288,37 @@ class LuwanDB:
         )
         await self._conn.commit()
 
+    async def clear_rate_limit(self, user_id: str | None = None) -> bool:
+        """清空申请限制
+
+        Args:
+            user_id: 用户 QQ 号，如果为 None 则清空所有用户的限制
+
+        Returns:
+            是否清空成功
+        """
+        if not self._conn:
+            raise RuntimeError("数据库未初始化")
+
+        try:
+            if user_id:
+                # 清空指定用户的限制
+                await self._conn.execute(
+                    "DELETE FROM rate_limit_records WHERE user_id = ?",
+                    (user_id,),
+                )
+                logger.info(f"[LuwanDB] 已清空用户 {user_id} 的申请限制")
+            else:
+                # 清空所有用户的限制
+                await self._conn.execute("DELETE FROM rate_limit_records")
+                logger.info("[LuwanDB] 已清空所有用户的申请限制")
+
+            await self._conn.commit()
+            return True
+        except Exception as e:
+            logger.error(f"[LuwanDB] 清空申请限制失败: {e}")
+            return False
+
     async def close(self) -> None:
         """关闭数据库连接"""
         if self._conn:

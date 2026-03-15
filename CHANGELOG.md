@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.2.0] - 2025-03-15
+
+### Added
+
+- feat(title_handler): 机器人反馈引用消息并 @ 群友
+- feat(title_handler): 转发消息的额外头衔消息引用详细消息
+- feat(database): 添加 clear_rate_limit 方法清空申请限制
+- feat(main): 添加清空限制指令（超级管理员专用）
+- feat(help_handler): 添加清空限制指令说明
+
+### Changed
+
+- refactor(title_handler): 使用 Reply + At + Plain 组件构建响应消息
+- refactor(title_handler): 转发时获取 message_id 用于引用
+
 ## [v1.1.2] - 2025-03-15
 
 ### Added

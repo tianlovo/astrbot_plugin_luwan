@@ -21,7 +21,7 @@ from .title_handler import TitleHandler
     "astrbot_plugin_luwan",
     "Luwan",
     "AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能",
-    "1.1.2",
+    "1.2.0",
 )
 class LuwanPlugin(Star):
     """鹿丸插件主类
@@ -243,6 +243,53 @@ class LuwanPlugin(Star):
         except Exception as e:
             logger.error(f"[LuwanPlugin] 更新配置失败: {e}")
             return False, f"❌ 更新配置失败: {e}"
+
+    @filter.command("清空限制", alias={"重置限制", "清除限制"})
+    @filter.event_message_type(EventMessageType.GROUP_MESSAGE)
+    async def clear_rate_limit(self, event: AiocqhttpMessageEvent) -> None:
+        """清空申请限制（超级管理员专用）
+
+        指令: 清空限制 [QQ号]
+        别名: 重置限制、清除限制
+        示例:
+          - 清空限制（清空所有用户限制）
+          - 清空限制 123456789（清空指定用户限制）
+        """
+        user_id = event.get_sender_id()
+
+        # 检查权限
+        if not self.cfg.is_admin(user_id):
+            await event.send(event.plain_result("❌ 你没有权限执行此操作"))
+            event.stop_event()
+            return
+
+        try:
+            # 解析参数
+            message_str = event.message_str.strip()
+            parts = message_str.split(maxsplit=1)
+
+            if len(parts) >= 2:
+                # 清空指定用户的限制
+                target_user_id = parts[1].strip()
+                success = await self.db.clear_rate_limit(target_user_id)
+                if success:
+                    await event.send(
+                        event.plain_result(f"✅ 已清空用户 {target_user_id} 的申请限制")
+                    )
+                else:
+                    await event.send(event.plain_result("❌ 清空限制失败"))
+            else:
+                # 清空所有用户的限制
+                success = await self.db.clear_rate_limit()
+                if success:
+                    await event.send(event.plain_result("✅ 已清空所有用户的申请限制"))
+                else:
+                    await event.send(event.plain_result("❌ 清空限制失败"))
+
+            event.stop_event()
+        except Exception as e:
+            logger.error(f"[LuwanPlugin] 清空限制失败: {e}")
+            await event.send(event.plain_result("❌ 操作失败，请稍后重试"))
 
     async def terminate(self) -> None:
         """插件卸载时清理资源"""

@@ -7,6 +7,7 @@ import re
 from datetime import datetime
 
 from astrbot.api import logger
+from astrbot.core.message.components import At, Reply
 from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
     AiocqhttpMessageEvent,
 )
@@ -108,13 +109,22 @@ class TitleHandler:
             event, user_id, user_name, group_id, title, is_change
         )
 
-        # 返回用户响应
+        # 返回用户响应（引用消息并 @ 用户）
         action_text = "更换" if is_change else "申请"
-        await event.send(
-            event.plain_result(
-                f"✅ 已{action_text}头衔「{title}」\n📢 已通知群主处理，请耐心等待"
-            )
-        )
+        message_id = event.message_obj.message_id
+        user_id = event.get_sender_id()
+
+        # 构建消息组件：引用 + @用户 + 文本
+        from astrbot.core.message.components import Comp
+
+        components = [
+            Reply(message_id),
+            At(qq=user_id),
+            Comp.Plain(
+                f"\n✅ 已{action_text}头衔「{title}」\n📢 已通知群主处理，请耐心等待"
+            ),
+        ]
+        await event.send(components)
         event.stop_event()
 
         logger.info(
@@ -166,16 +176,33 @@ class TitleHandler:
 
         try:
             # 私聊发送给群主 - 通知消息
-            await event.bot.send_private_msg(
+            forward_msg = await event.bot.send_private_msg(
                 user_id=int(self.config.forward_target_qq),
                 message=forward_message,
             )
 
-            # 额外发送头衔内容，方便群主复制
-            await event.bot.send_private_msg(
-                user_id=int(self.config.forward_target_qq),
-                message=title,
-            )
+            # 获取转发消息的消息ID用于引用
+            forward_msg_id = None
+            if forward_msg and isinstance(forward_msg, dict):
+                forward_msg_id = forward_msg.get("message_id")
+
+            # 额外发送头衔内容，方便群主复制，并引用详细消息
+            if forward_msg_id:
+                # 构建引用消息
+                title_message = [
+                    {"type": "reply", "data": {"id": str(forward_msg_id)}},
+                    {"type": "text", "data": {"text": title}},
+                ]
+                await event.bot.send_private_msg(
+                    user_id=int(self.config.forward_target_qq),
+                    message=title_message,
+                )
+            else:
+                # 无法获取消息ID时直接发送
+                await event.bot.send_private_msg(
+                    user_id=int(self.config.forward_target_qq),
+                    message=title,
+                )
 
             logger.info(
                 f"[LuwanPlugin] 已转发头衔申请到 {self.config.forward_target_qq}"
@@ -228,10 +255,19 @@ class TitleHandler:
         # 转发移除请求给群主
         await self._forward_remove_to_owner(event, user_id, user_name, group_id)
 
-        # 返回用户响应
-        await event.send(
-            event.plain_result("✅ 已申请移除头衔\n📢 已通知群主处理，请耐心等待")
-        )
+        # 返回用户响应（引用消息并 @ 用户）
+        message_id = event.message_obj.message_id
+        user_id = event.get_sender_id()
+
+        # 构建消息组件：引用 + @用户 + 文本
+        from astrbot.core.message.components import Comp
+
+        components = [
+            Reply(message_id),
+            At(qq=user_id),
+            Comp.Plain("\n✅ 已申请移除头衔\n📢 已通知群主处理，请耐心等待"),
+        ]
+        await event.send(components)
         event.stop_event()
 
         logger.info(

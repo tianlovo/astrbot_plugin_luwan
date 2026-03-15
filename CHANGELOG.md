@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.2.3] - 2025-03-15
+
+### Fixed
+
+- fix(title_handler): 修复消息发送方式错误
+- fix(title_handler): 将 await event.send() 改为 yield event.chain_result()
+- fix(main): 适配生成器调用方式，使用 async for 迭代
+
 ## [v1.2.2] - 2025-03-15
 
 ### Fixed

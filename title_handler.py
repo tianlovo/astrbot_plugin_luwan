@@ -57,7 +57,7 @@ class TitleHandler:
 
     async def handle_apply_title(
         self, event: AiocqhttpMessageEvent, title: str, is_change: bool = False
-    ) -> None:
+    ):
         """处理头衔申请
 
         Args:
@@ -115,14 +115,14 @@ class TitleHandler:
         user_id = event.get_sender_id()
 
         # 构建消息组件：引用 + @用户 + 文本
-        components = [
+        chain = [
             Reply(id=message_id),
             At(qq=user_id),
             Plain(
                 f"\n✅ 已{action_text}头衔「{title}」\n📢 已通知群主处理，请耐心等待"
             ),
         ]
-        await event.send(components)
+        yield event.chain_result(chain)
         event.stop_event()
 
         logger.info(
@@ -210,16 +210,16 @@ class TitleHandler:
 
     async def handle_change_title(
         self, event: AiocqhttpMessageEvent, new_title: str
-    ) -> None:
+    ):
         """处理更换头衔
 
         Args:
             event: 消息事件对象
             new_title: 新头衔名称
         """
-        await self.handle_apply_title(event, new_title, is_change=True)
+        yield self.handle_apply_title(event, new_title, is_change=True)
 
-    async def handle_remove_title(self, event: AiocqhttpMessageEvent) -> None:
+    async def handle_remove_title(self, event: AiocqhttpMessageEvent):
         """处理移除头衔
 
         Args:
@@ -258,12 +258,12 @@ class TitleHandler:
         user_id = event.get_sender_id()
 
         # 构建消息组件：引用 + @用户 + 文本
-        components = [
+        chain = [
             Reply(id=message_id),
             At(qq=user_id),
             Plain("\n✅ 已申请移除头衔\n📢 已通知群主处理，请耐心等待"),
         ]
-        await event.send(components)
+        yield event.chain_result(chain)
         event.stop_event()
 
         logger.info(

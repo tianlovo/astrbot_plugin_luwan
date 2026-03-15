@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.1.1] - 2025-03-15
+
+### Added
+
+- feat(title_handler): 添加头衔格式验证功能
+- feat(title_handler): 头衔不可包含空格（半角和全角）
+- feat(title_handler): 头衔长度限制为最多5个字符
+
 ## [v1.1.0] - 2025-03-15
 
 ### Added

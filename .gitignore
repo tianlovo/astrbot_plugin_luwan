@@ -209,3 +209,4 @@ __marimo__/
 # IDE
 .idea/
 .vscode/
+/commit_msg.txt

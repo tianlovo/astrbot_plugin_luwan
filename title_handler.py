@@ -30,6 +30,29 @@ class TitleHandler:
         self.config = config
         self.db = db
 
+    def _validate_title(self, title: str) -> tuple[bool, str]:
+        """验证头衔格式
+
+        Args:
+            title: 申请的头衔名称
+
+        Returns:
+            (是否有效, 错误提示)
+        """
+        # 检查是否为空
+        if not title:
+            return False, "❌ 请输入头衔名称"
+
+        # 检查是否包含空格
+        if " " in title or "\u3000" in title:
+            return False, "❌ 头衔不能包含空格"
+
+        # 检查长度（单字母、单空格等都算一个字符）
+        if len(title) > 5:
+            return False, "❌ 头衔长度不能超过5个字符"
+
+        return True, ""
+
     async def handle_apply_title(
         self, event: AiocqhttpMessageEvent, title: str, is_change: bool = False
     ) -> None:
@@ -43,6 +66,13 @@ class TitleHandler:
         user_id = event.get_sender_id()
         group_id = event.get_group_id()
         user_name = event.get_sender_name()
+
+        # 验证头衔格式
+        is_valid, error_msg = self._validate_title(title)
+        if not is_valid:
+            await event.send(event.plain_result(error_msg))
+            event.stop_event()
+            return
 
         # 检查频率限制
         can_apply, message = await self.db.check_rate_limit(

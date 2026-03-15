@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.2.7] - 2025-03-15
+
+### Fixed
+
+- fix(main): 优化生成器调用方式
+- fix(main): 将 `async for _ in ...` 改为直接使用 `yield`
+- fix(main): 移除 `manage_title` 方法的 `-> None` 返回类型注解
+
 ## [v1.2.6] - 2025-03-15
 
 ### Fixed

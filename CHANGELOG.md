@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.2.4] - 2025-03-15
+
+### Fixed
+
+- fix(title_handler): 修复 event.stop_event() 中断消息发送问题
+- fix(title_handler): 移除 handle_apply_title 中的 event.stop_event()
+- fix(title_handler): 移除 handle_remove_title 中的 event.stop_event()
+- fix(main): 在生成器调用后添加 event.stop_event()
+
 ## [v1.2.3] - 2025-03-15
 
 ### Fixed

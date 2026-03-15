@@ -123,7 +123,6 @@ class TitleHandler:
             ),
         ]
         yield event.chain_result(chain)
-        event.stop_event()
 
         logger.info(
             f"[LuwanPlugin] 用户 {user_name}({user_id}) 在群 {group_id} "
@@ -208,9 +207,7 @@ class TitleHandler:
         except Exception as e:
             logger.error(f"[LuwanPlugin] 转发申请失败: {e}")
 
-    async def handle_change_title(
-        self, event: AiocqhttpMessageEvent, new_title: str
-    ):
+    async def handle_change_title(self, event: AiocqhttpMessageEvent, new_title: str):
         """处理更换头衔
 
         Args:
@@ -264,7 +261,6 @@ class TitleHandler:
             Plain("\n✅ 已申请移除头衔\n📢 已通知群主处理，请耐心等待"),
         ]
         yield event.chain_result(chain)
-        event.stop_event()
 
         logger.info(
             f"[LuwanPlugin] 用户 {user_name}({user_id}) 在群 {group_id} 申请移除头衔"

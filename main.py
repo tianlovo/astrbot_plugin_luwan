@@ -21,7 +21,7 @@ from .title_handler import TitleHandler
     "astrbot_plugin_luwan",
     "Luwan",
     "AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能",
-    "1.2.3",
+    "1.2.4",
 )
 class LuwanPlugin(Star):
     """鹿丸插件主类
@@ -123,6 +123,9 @@ class LuwanPlugin(Star):
             else:
                 async for _ in self.title_handler.handle_apply_title(event, title):
                     pass
+
+            # 停止事件传播
+            event.stop_event()
         except Exception as e:
             logger.error(f"[LuwanPlugin] 处理头衔管理失败: {e}")
             await event.send(event.plain_result("❌ 操作失败，请稍后重试"))

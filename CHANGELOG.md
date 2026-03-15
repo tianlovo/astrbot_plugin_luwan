@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.2.9] - 2025-03-15
+
+### Fixed
+
+- fix(main): 修复生成器调用方式
+- fix(main): 将 `await` 改回 `async for _ in ...` 正确迭代生成器
+
 ## [v1.2.8] - 2025-03-15
 
 ### Fixed

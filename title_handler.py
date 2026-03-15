@@ -58,7 +58,7 @@ class TitleHandler:
 
     async def handle_apply_title(
         self, event: AiocqhttpMessageEvent, title: str, is_change: bool = False
-    ):
+    ) -> None:
         """处理头衔申请
 
         Args:
@@ -113,13 +113,13 @@ class TitleHandler:
 
         # 构建消息组件：引用 + @用户 + 文本
         chain = [
-            # Comp.Reply(id=message_id),
+            Comp.Reply(id=message_id),
             Comp.At(qq=user_id),
             Comp.Plain(
                 f"\n✅ 已{action_text}头衔「{title}」\n📢 已通知群主处理，请耐心等待"
             ),
         ]
-        yield event.chain_result(chain)
+        await event.send(event.chain_result(chain))
 
         logger.info(
             f"[LuwanPlugin] 用户 {user_name}({user_id}) 在群 {group_id} "
@@ -204,16 +204,16 @@ class TitleHandler:
         except Exception as e:
             logger.error(f"[LuwanPlugin] 转发申请失败: {e}")
 
-    async def handle_change_title(self, event: AiocqhttpMessageEvent, new_title: str):
+    async def handle_change_title(self, event: AiocqhttpMessageEvent, new_title: str) -> None:
         """处理更换头衔
 
         Args:
             event: 消息事件对象
             new_title: 新头衔名称
         """
-        yield self.handle_apply_title(event, new_title, is_change=True)
+        await self.handle_apply_title(event, new_title, is_change=True)
 
-    async def handle_remove_title(self, event: AiocqhttpMessageEvent):
+    async def handle_remove_title(self, event: AiocqhttpMessageEvent) -> None:
         """处理移除头衔
 
         Args:
@@ -251,11 +251,11 @@ class TitleHandler:
 
         # 构建消息组件：引用 + @用户 + 文本
         chain = [
-            # Comp.Reply(id=message_id),
+            Comp.Reply(id=message_id),
             Comp.At(qq=user_id),
             Comp.Plain("\n✅ 已申请移除头衔\n📢 已通知群主处理，请耐心等待"),
         ]
-        yield event.chain_result(chain)
+        await event.send(event.chain_result(chain))
 
         logger.info(
             f"[LuwanPlugin] 用户 {user_name}({user_id}) 在群 {group_id} 申请移除头衔"

@@ -236,6 +236,9 @@ class ImageForwarder:
         """
         from astrbot.api.event import MessageChain
         from astrbot.api.platform import PlatformAdapterType
+        from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_adapter import (
+            AiocqhttpAdapter,
+        )
 
         # 获取 aiocqhttp 平台适配器
         platform = self.context.get_platform(PlatformAdapterType.AIOCQHTTP)
@@ -243,14 +246,26 @@ class ImageForwarder:
             logger.error("[ImageForwarder] 无法获取 aiocqhttp 平台适配器")
             return
 
+        # 判断是否为 AiocqhttpAdapter 实例
+        if not isinstance(platform, AiocqhttpAdapter):
+            logger.error(f"[ImageForwarder] 平台适配器类型不匹配: {type(platform)}")
+            return
+
+        # 获取平台 ID
+        platform_id = platform.metadata.id
+        logger.info(f"[ImageForwarder] 使用平台适配器: {platform_id}")
+
         # 构建消息链 - 仅发送图片
         chain = MessageChain().file_image(image.file_path)
 
         # 转发到每个目标群
         for group_id in self.cfg.comupik_target_groups:
             try:
-                # 使用平台适配器发送群消息
-                await platform.send_group_message(group_id, chain)
+                # 构建 unified_msg_origin
+                umo = f"{platform_id}:GroupMessage:{group_id}"
+
+                # 使用 context.send_message 发送主动消息
+                await self.context.send_message(umo, chain)
                 logger.info(f"[ImageForwarder] 已转发图片 {image.id} 到群 {group_id}")
 
             except Exception as e:

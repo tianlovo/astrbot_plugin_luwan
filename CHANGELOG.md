@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.3.6] - 2025-03-15
+
+### Fixed
+
+- fix(image_forwarder): 修复 UMO 格式不正确问题
+- fix(image_forwarder): 使用 platform.metadata.id 获取正确的平台 ID
+- fix(image_forwarder): 使用 self.context.send_message() 发送主动消息
+- fix(image_forwarder): 正确构建 unified_msg_origin 格式
+
+## [v1.3.5] - 2025-03-15
+
+### Fixed
+
+- fix(image_forwarder): 修复找不到平台适配器问题
+- fix(image_forwarder): 使用 self.context.get_platform() 获取平台适配器
+- fix(image_forwarder): 使用 platform.send_group_message() 发送群消息
+- fix(image_forwarder): 移除手动构建 UMO 的代码
+
+## [v1.3.4] - 2025-03-15
+
+### Fixed
+
+- fix(image_forwarder): 修复 MessageChain 使用错误
+- fix(image_forwarder): 使用 chain.file_image() 替代 chain.append()
+
 ## [v1.3.3] - 2025-03-15
 
 ### Changed

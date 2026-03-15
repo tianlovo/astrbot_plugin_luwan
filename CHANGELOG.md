@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.3.3] - 2025-03-15
+
+### Changed
+
+- refactor(image_forwarder): 仅处理本地路径图片
+- refactor(image_forwarder): 网络 URL 图片跳过并记录警告日志
+- refactor(image_forwarder): 使用 Comp.Image.fromFileSystem() 发送本地图片
+
 ## [v1.3.2] - 2025-03-15
 
 ### Changed

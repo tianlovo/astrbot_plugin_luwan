@@ -207,6 +207,14 @@ class ImageForwarder:
             self.client._known_ids.add(image.id)
             return
 
+        # 双重校验：检查物理文件是否存在
+        if not Path(file_path).exists():
+            logger.warning(
+                f"[ImageForwarder] 图片 {image.id} 的物理文件不存在，跳过处理: {file_path}"
+            )
+            self.client._known_ids.add(image.id)
+            return
+
         try:
             # 转发到所有目标群（直接使用 file_path，无需下载）
             await self._forward_to_groups(image)
@@ -226,12 +234,10 @@ class ImageForwarder:
         Args:
             image: 图片信息
         """
-        import astrbot.api.message_components as Comp
         from astrbot.api.event import MessageChain
 
         # 构建消息链 - 仅发送图片
-        chain = MessageChain()
-        chain.append(Comp.Image.fromFileSystem(image.file_path))
+        chain = MessageChain().file_image(image.file_path)
 
         # 转发到每个目标群
         for group_id in self.cfg.comupik_target_groups:

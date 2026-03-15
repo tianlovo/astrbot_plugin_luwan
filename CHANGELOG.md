@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.2.1] - 2025-03-15
+
+### Fixed
+
+- fix(title_handler): 修复 Comp.Plain 导入错误
+- fix(title_handler): 正确导入 Plain 类替代 Comp.Plain
+
 ## [v1.2.0] - 2025-03-15
 
 ### Added

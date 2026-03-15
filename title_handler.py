@@ -7,7 +7,7 @@ import re
 from datetime import datetime
 
 from astrbot.api import logger
-from astrbot.core.message.components import At, Reply
+from astrbot.core.message.components import At, Plain, Reply
 from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
     AiocqhttpMessageEvent,
 )
@@ -115,12 +115,10 @@ class TitleHandler:
         user_id = event.get_sender_id()
 
         # 构建消息组件：引用 + @用户 + 文本
-        from astrbot.core.message.components import Comp
-
         components = [
             Reply(message_id),
             At(qq=user_id),
-            Comp.Plain(
+            Plain(
                 f"\n✅ 已{action_text}头衔「{title}」\n📢 已通知群主处理，请耐心等待"
             ),
         ]
@@ -260,12 +258,10 @@ class TitleHandler:
         user_id = event.get_sender_id()
 
         # 构建消息组件：引用 + @用户 + 文本
-        from astrbot.core.message.components import Comp
-
         components = [
             Reply(message_id),
             At(qq=user_id),
-            Comp.Plain("\n✅ 已申请移除头衔\n📢 已通知群主处理，请耐心等待"),
+            Plain("\n✅ 已申请移除头衔\n📢 已通知群主处理，请耐心等待"),
         ]
         await event.send(components)
         event.stop_event()

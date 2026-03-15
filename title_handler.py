@@ -14,6 +14,7 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
 
 from .config import LuwanConfig
 from .database import LuwanDB
+import astrbot.api.message_components as Comp
 
 
 class TitleHandler:
@@ -116,9 +117,9 @@ class TitleHandler:
 
         # 构建消息组件：引用 + @用户 + 文本
         chain = [
-            Reply(id=message_id),
-            At(qq=user_id),
-            Plain(
+            Comp.Reply(id=message_id),
+            Comp.At(qq=user_id),
+            Comp.Plain(
                 f"\n✅ 已{action_text}头衔「{title}」\n📢 已通知群主处理，请耐心等待"
             ),
         ]
@@ -256,9 +257,9 @@ class TitleHandler:
 
         # 构建消息组件：引用 + @用户 + 文本
         chain = [
-            Reply(id=message_id),
-            At(qq=user_id),
-            Plain("\n✅ 已申请移除头衔\n📢 已通知群主处理，请耐心等待"),
+            Comp.Reply(id=message_id),
+            Comp.At(qq=user_id),
+            Comp.Plain("\n✅ 已申请移除头衔\n📢 已通知群主处理，请耐心等待"),
         ]
         yield event.chain_result(chain)
 

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.2.5] - 2025-03-15
+
+### Fixed
+
+- fix(title_handler): 修复消息组件导入方式
+- fix(title_handler): 使用 `import astrbot.api.message_components as Comp` 导入
+- fix(title_handler): 使用 `Comp.Reply`、`Comp.At`、`Comp.Plain` 构建消息链
+
 ## [v1.2.4] - 2025-03-15
 
 ### Fixed

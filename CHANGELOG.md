@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.1.2] - 2025-03-15
+
+### Added
+
+- feat(title_handler): 添加移除头衔功能
+- feat(title_handler): 支持通过"无/取消/移除/删除/off/none"移除头衔
+- feat(main): 合并申请头衔和更换头衔为统一的头衔管理指令
+
+### Changed
+
+- refactor(main): 将 apply_title 和 change_title 合并为 manage_title
+- refactor(help_handler): 更新帮助菜单，合并头衔相关指令为"头衔管理"
+
 ## [v1.1.1] - 2025-03-15
 
 ### Added

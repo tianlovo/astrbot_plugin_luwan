@@ -3,6 +3,7 @@
 处理用户的头衔申请、频率限制检查和转发功能
 """
 
+import re
 from datetime import datetime
 
 from astrbot.api import logger
@@ -193,7 +194,101 @@ class TitleHandler:
         """
         await self.handle_apply_title(event, new_title, is_change=True)
 
-    def extract_title_from_message(self, message_str: str, command: str) -> str:
+    async def handle_remove_title(self, event: AiocqhttpMessageEvent) -> None:
+        """处理移除头衔
+
+        Args:
+            event: 消息事件对象
+        """
+        user_id = event.get_sender_id()
+        group_id = event.get_group_id()
+        user_name = event.get_sender_name()
+
+        # 检查频率限制
+        can_apply, message = await self.db.check_rate_limit(
+            user_id, self.config.min_interval, self.config.daily_limit
+        )
+
+        if not can_apply:
+            await event.send(event.plain_result(message))
+            event.stop_event()
+            return
+
+        # 检查是否设置了转发目标
+        if not self.config.forward_target_qq:
+            await event.send(
+                event.plain_result("❌ 插件未配置转发目标QQ，请联系管理员配置")
+            )
+            event.stop_event()
+            return
+
+        # 记录频率限制
+        await self.db.record_application(user_id)
+
+        # 转发移除请求给群主
+        await self._forward_remove_to_owner(event, user_id, user_name, group_id)
+
+        # 返回用户响应
+        await event.send(
+            event.plain_result("✅ 已申请移除头衔\n📢 已通知群主处理，请耐心等待")
+        )
+        event.stop_event()
+
+        logger.info(
+            f"[LuwanPlugin] 用户 {user_name}({user_id}) 在群 {group_id} 申请移除头衔"
+        )
+
+    async def _forward_remove_to_owner(
+        self,
+        event: AiocqhttpMessageEvent,
+        user_id: str,
+        user_name: str,
+        group_id: str,
+    ) -> None:
+        """将移除头衔请求转发给群主
+
+        Args:
+            event: 消息事件对象
+            user_id: 申请人QQ号
+            user_name: 申请人昵称
+            group_id: 群号
+        """
+        try:
+            # 获取群信息
+            group_info = await event.bot.get_group_info(group_id=int(group_id))
+            group_name = (
+                group_info.get("group_name", group_id) if group_info else group_id
+            )
+        except Exception:
+            group_name = group_id
+
+        # 构建转发消息
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        forward_message = (
+            f"📋 头衔移除通知\n"
+            f"━━━━━━━━━━━━━━\n"
+            f"👤 申请人：{user_name}({user_id})\n"
+            f"👥 来源群：{group_name}({group_id})\n"
+            f"🏷️ 操作：移除头衔\n"
+            f"⏰ 申请时间：{current_time}\n"
+            f"━━━━━━━━━━━━━━"
+        )
+
+        try:
+            # 私聊发送给群主
+            await event.bot.send_private_msg(
+                user_id=int(self.config.forward_target_qq),
+                message=forward_message,
+            )
+
+            logger.info(
+                f"[LuwanPlugin] 已转发头衔移除申请到 {self.config.forward_target_qq}"
+            )
+        except Exception as e:
+            logger.error(f"[LuwanPlugin] 转发移除申请失败: {e}")
+
+    def extract_title_from_message(self, message_str: str, command: str) -> str | None:
         """从消息中提取头衔名称
 
         Args:
@@ -201,10 +296,18 @@ class TitleHandler:
             command: 指令部分（如"申请头衔"）
 
         Returns:
-            提取的头衔名称
+            提取的头衔名称，如果未提供则返回 None
         """
-        # 移除指令部分，获取头衔
-        title = message_str.replace(command, "").strip()
-        # 移除可能的前缀符号
-        title = title.lstrip("/!！").strip()
-        return title
+        # 使用正则表达式匹配指令，支持多个空格
+        # 模式：指令 + 一个或多个空格 + 头衔内容
+        pattern = rf"{re.escape(command)}\s+(.+)"
+        match = re.search(pattern, message_str)
+
+        if match:
+            title = match.group(1).strip()
+            # 移除可能的前缀符号
+            title = title.lstrip("/!！").strip()
+            if title:
+                return title
+
+        return None

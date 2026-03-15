@@ -21,7 +21,7 @@ from .title_handler import TitleHandler
     "astrbot_plugin_luwan",
     "Luwan",
     "AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能",
-    "1.1.1",
+    "1.1.2",
 )
 class LuwanPlugin(Star):
     """鹿丸插件主类
@@ -72,16 +72,19 @@ class LuwanPlugin(Star):
             logger.error(f"[LuwanPlugin] 显示帮助菜单失败: {e}")
             await event.send(event.plain_result("❌ 显示帮助菜单失败，请稍后重试"))
 
-    # ==================== 头衔申请指令 ====================
+    # ==================== 头衔管理指令 ====================
 
-    @filter.command("申请头衔", alias={"我要头衔"})
+    @filter.command("头衔", alias={"申请头衔", "我要头衔", "换头衔", "更换头衔"})
     @filter.event_message_type(EventMessageType.GROUP_MESSAGE)
-    async def apply_title(self, event: AiocqhttpMessageEvent) -> None:
-        """申请群头衔
+    async def manage_title(self, event: AiocqhttpMessageEvent) -> None:
+        """管理群头衔（申请/更换/移除）
 
-        指令: 申请头衔 <头衔名称>
-        别名: 我要头衔
-        示例: 申请头衔 小可爱
+        指令: 头衔 <头衔名称>
+        别名: 申请头衔、我要头衔、换头衔、更换头衔
+        示例:
+          - 头衔 小可爱（申请/更换头衔）
+          - 头衔 无（移除头衔）
+          - 头衔 取消（移除头衔）
         """
         if not self.title_handler:
             await event.send(event.plain_result("❌ 插件尚未初始化完成，请稍后重试"))
@@ -90,67 +93,37 @@ class LuwanPlugin(Star):
         try:
             # 提取头衔名称
             message_str = event.message_str
-            title = self.title_handler.extract_title_from_message(
-                message_str, "申请头衔"
-            )
+            title = self.title_handler.extract_title_from_message(message_str, "头衔")
 
-            if not title:
-                # 尝试别名"我要头衔"
-                title = self.title_handler.extract_title_from_message(
-                    message_str, "我要头衔"
-                )
+            if title is None:
+                # 尝试其他别名
+                for cmd in ["申请头衔", "我要头衔", "换头衔", "更换头衔"]:
+                    title = self.title_handler.extract_title_from_message(
+                        message_str, cmd
+                    )
+                    if title is not None:
+                        break
 
-            if not title:
+            if title is None:
                 await event.send(
                     event.plain_result(
-                        "❌ 请输入要申请的头衔名称\n示例：申请头衔 小可爱"
+                        "❌ 请输入头衔名称\n"
+                        "示例：\n"
+                        "  头衔 小可爱（申请/更换）\n"
+                        "  头衔 无（移除头衔）"
                     )
                 )
                 event.stop_event()
                 return
 
-            await self.title_handler.handle_apply_title(event, title)
+            # 检查是否为移除头衔操作
+            if title in ("无", "取消", "移除", "删除", "off", "none"):
+                await self.title_handler.handle_remove_title(event)
+            else:
+                await self.title_handler.handle_apply_title(event, title)
         except Exception as e:
-            logger.error(f"[LuwanPlugin] 处理头衔申请失败: {e}")
-            await event.send(event.plain_result("❌ 申请失败，请稍后重试"))
-
-    @filter.command("换头衔", alias={"更换头衔"})
-    @filter.event_message_type(EventMessageType.GROUP_MESSAGE)
-    async def change_title(self, event: AiocqhttpMessageEvent) -> None:
-        """更换群头衔
-
-        指令: 换头衔 <新头衔名称>
-        别名: 更换头衔
-        示例: 换头衔 大可爱
-        """
-        if not self.title_handler:
-            await event.send(event.plain_result("❌ 插件尚未初始化完成，请稍后重试"))
-            return
-
-        try:
-            # 提取新头衔名称
-            message_str = event.message_str
-            title = self.title_handler.extract_title_from_message(message_str, "换头衔")
-
-            if not title:
-                # 尝试别名"更换头衔"
-                title = self.title_handler.extract_title_from_message(
-                    message_str, "更换头衔"
-                )
-
-            if not title:
-                await event.send(
-                    event.plain_result(
-                        "❌ 请输入要更换的新头衔名称\n示例：换头衔 大可爱"
-                    )
-                )
-                event.stop_event()
-                return
-
-            await self.title_handler.handle_change_title(event, title)
-        except Exception as e:
-            logger.error(f"[LuwanPlugin] 处理头衔更换失败: {e}")
-            await event.send(event.plain_result("❌ 更换失败，请稍后重试"))
+            logger.error(f"[LuwanPlugin] 处理头衔管理失败: {e}")
+            await event.send(event.plain_result("❌ 操作失败，请稍后重试"))
 
     # ==================== 管理配置指令 ====================
 

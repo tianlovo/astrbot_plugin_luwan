@@ -116,7 +116,7 @@ class TitleHandler:
 
         # 构建消息组件：引用 + @用户 + 文本
         components = [
-            Reply(message_id),
+            Reply(id=message_id),
             At(qq=user_id),
             Plain(
                 f"\n✅ 已{action_text}头衔「{title}」\n📢 已通知群主处理，请耐心等待"
@@ -259,7 +259,7 @@ class TitleHandler:
 
         # 构建消息组件：引用 + @用户 + 文本
         components = [
-            Reply(message_id),
+            Reply(id=message_id),
             At(qq=user_id),
             Plain("\n✅ 已申请移除头衔\n📢 已通知群主处理，请耐心等待"),
         ]

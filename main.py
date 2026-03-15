@@ -11,9 +11,11 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
 )
 from astrbot.core.star.filter.event_message_type import EventMessageType
 
+from .comupik_client import ComuPikClient
 from .config import LuwanConfig
 from .database import LuwanDB
 from .help_handler import HelpHandler
+from .image_forwarder import ImageForwarder
 from .title_handler import TitleHandler
 
 
@@ -21,7 +23,7 @@ from .title_handler import TitleHandler
     "astrbot_plugin_luwan",
     "Luwan",
     "AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能",
-    "1.2.10",
+    "1.3.0",
 )
 class LuwanPlugin(Star):
     """鹿丸插件主类
@@ -42,12 +44,20 @@ class LuwanPlugin(Star):
         self.db = LuwanDB(self.cfg.db_path)
         self.help_handler = HelpHandler(self.cfg.min_interval, self.cfg.daily_limit)
         self.title_handler: TitleHandler | None = None
+        self.image_forwarder: ImageForwarder | None = None
 
     async def initialize(self) -> None:
         """异步初始化插件"""
         try:
             await self.db.init()
             self.title_handler = TitleHandler(self.cfg, self.db)
+
+            # 初始化 ComuPik 图片转发服务
+            await self.db.init_comupik_tables()
+            self.image_forwarder = ImageForwarder(self.cfg, self.db, self.context)
+            if await self.image_forwarder.initialize():
+                await self.image_forwarder.start()
+
             logger.info("[LuwanPlugin] 插件初始化完成")
         except Exception as e:
             logger.error(f"[LuwanPlugin] 插件初始化失败: {e}")
@@ -180,6 +190,14 @@ class LuwanPlugin(Star):
         Returns:
             配置信息文本
         """
+        # ComuPik 配置
+        comupik_status = "✅ 启用" if self.cfg.comupik_enabled else "❌ 禁用"
+        target_groups = (
+            ", ".join(self.cfg.comupik_target_groups)
+            if self.cfg.comupik_target_groups
+            else "未设置"
+        )
+
         return (
             "⚙️ 【鹿丸插件配置】\n"
             "━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -189,6 +207,13 @@ class LuwanPlugin(Star):
             f"📊 每日申请上限: {self.cfg.daily_limit} 次\n"
             f"👤 超级管理员: {self.cfg.super_admin or '未设置'}\n"
             f"✅ 自动批准: {'开启' if self.cfg.auto_approve else '关闭'}\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n"
+            "📷 【ComuPik 图片转发】\n"
+            f"状态: {comupik_status}\n"
+            f"API地址: {self.cfg.comupik_api_url}\n"
+            f"目标群: {target_groups}\n"
+            f"轮询间隔: {self.cfg.comupik_poll_interval}秒\n"
+            f"时间范围: {self.cfg.comupik_poll_time_range}小时\n"
             "━━━━━━━━━━━━━━━━━━━━━━\n"
             "💡 修改配置: 鹿丸配置 <配置项> <值>"
         )
@@ -209,6 +234,10 @@ class LuwanPlugin(Star):
             "command_prefix",
             "super_admin",
             "auto_approve",
+            "comupik.enabled",
+            "comupik.api_url",
+            "comupik.poll_interval",
+            "comupik.poll_time_range",
         ]
 
         if key not in allowed_keys:
@@ -289,6 +318,10 @@ class LuwanPlugin(Star):
     async def terminate(self) -> None:
         """插件卸载时清理资源"""
         try:
+            # 停止图片转发服务
+            if self.image_forwarder:
+                await self.image_forwarder.stop()
+
             await self.db.close()
             logger.info("[LuwanPlugin] 插件已卸载，资源已清理")
         except Exception as e:

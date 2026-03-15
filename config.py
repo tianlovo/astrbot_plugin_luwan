@@ -100,6 +100,39 @@ class LuwanConfig:
         """是否自动批准头衔申请"""
         return self.get("auto_approve", False)
 
+    # ==================== ComuPik 配置 ====================
+
+    @property
+    def comupik_enabled(self) -> bool:
+        """是否启用 ComuPik 图片转发功能"""
+        comupik = self.get("comupik", {})
+        return comupik.get("enabled", True)
+
+    @property
+    def comupik_api_url(self) -> str:
+        """ComuPik API 地址"""
+        comupik = self.get("comupik", {})
+        return comupik.get("api_url", "http://127.0.0.1:8080")
+
+    @property
+    def comupik_target_groups(self) -> list[str]:
+        """ComuPik 图片转发目标 QQ 群列表"""
+        comupik = self.get("comupik", {})
+        groups = comupik.get("target_groups", [])
+        return self._clean_ids(groups)
+
+    @property
+    def comupik_poll_interval(self) -> int:
+        """ComuPik 轮询间隔（秒）"""
+        comupik = self.get("comupik", {})
+        return comupik.get("poll_interval", 30)
+
+    @property
+    def comupik_poll_time_range(self) -> int:
+        """ComuPik 轮询时间范围（小时）"""
+        comupik = self.get("comupik", {})
+        return comupik.get("poll_time_range", 12)
+
     def is_admin(self, user_id: str) -> bool:
         """检查用户是否为管理员
 

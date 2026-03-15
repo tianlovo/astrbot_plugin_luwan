@@ -319,6 +319,153 @@ class LuwanDB:
             logger.error(f"[LuwanDB] 清空申请限制失败: {e}")
             return False
 
+    # ==================== ComuPik 图片转发记录 ====================
+
+    async def init_comupik_tables(self) -> None:
+        """初始化 ComuPik 相关数据库表"""
+        if not self._conn:
+            raise RuntimeError("数据库未初始化")
+
+        try:
+            # 创建已转发图片记录表
+            await self._conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS comupik_forwarded_images (
+                    image_id INTEGER PRIMARY KEY,
+                    forwarded_at INTEGER NOT NULL
+                )
+                """
+            )
+
+            # 创建索引
+            await self._conn.execute(
+                """
+                CREATE INDEX IF NOT EXISTS idx_forwarded_at
+                ON comupik_forwarded_images(forwarded_at)
+                """
+            )
+
+            await self._conn.commit()
+            logger.info("[LuwanDB] ComuPik 相关表初始化完成")
+        except Exception as e:
+            logger.error(f"[LuwanDB] ComuPik 表初始化失败: {e}")
+            raise
+
+    async def is_image_forwarded(self, image_id: int) -> bool:
+        """检查图片是否已转发
+
+        Args:
+            image_id: 图片ID
+
+        Returns:
+            是否已转发
+        """
+        if not self._conn:
+            raise RuntimeError("数据库未初始化")
+
+        try:
+            async with self._conn.execute(
+                "SELECT 1 FROM comupik_forwarded_images WHERE image_id = ?",
+                (image_id,),
+            ) as cursor:
+                row = await cursor.fetchone()
+                return row is not None
+        except Exception as e:
+            logger.error(f"[LuwanDB] 检查图片转发状态失败: {e}")
+            return False
+
+    async def record_forwarded_image(self, image_id: int) -> bool:
+        """记录已转发的图片
+
+        Args:
+            image_id: 图片ID
+
+        Returns:
+            是否记录成功
+        """
+        if not self._conn:
+            raise RuntimeError("数据库未初始化")
+
+        try:
+            now = int(time.time())
+            await self._conn.execute(
+                """
+                INSERT OR REPLACE INTO comupik_forwarded_images
+                (image_id, forwarded_at)
+                VALUES (?, ?)
+                """,
+                (image_id, now),
+            )
+            await self._conn.commit()
+            return True
+        except Exception as e:
+            logger.error(f"[LuwanDB] 记录图片转发状态失败: {e}")
+            return False
+
+    async def get_forwarded_image_ids(
+        self, start_time: int | None = None, end_time: int | None = None
+    ) -> set[int]:
+        """获取已转发的图片ID
+
+        Args:
+            start_time: 开始时间戳（可选）
+            end_time: 结束时间戳（可选）
+
+        Returns:
+            已转发的图片ID集合
+        """
+        if not self._conn:
+            raise RuntimeError("数据库未初始化")
+
+        try:
+            # 如果提供了时间范围，只获取该范围内的记录
+            if start_time is not None and end_time is not None:
+                async with self._conn.execute(
+                    """
+                    SELECT image_id FROM comupik_forwarded_images
+                    WHERE forwarded_at >= ? AND forwarded_at <= ?
+                    """,
+                    (start_time, end_time),
+                ) as cursor:
+                    rows = await cursor.fetchall()
+                    return {row[0] for row in rows}
+            else:
+                # 获取所有记录（向后兼容）
+                async with self._conn.execute(
+                    "SELECT image_id FROM comupik_forwarded_images"
+                ) as cursor:
+                    rows = await cursor.fetchall()
+                    return {row[0] for row in rows}
+        except Exception as e:
+            logger.error(f"[LuwanDB] 获取已转发图片ID失败: {e}")
+            return set()
+
+    async def cleanup_old_forwarded_records(self, days: int = 30) -> int:
+        """清理旧的转发记录
+
+        Args:
+            days: 保留多少天内的记录
+
+        Returns:
+            清理的记录数
+        """
+        if not self._conn:
+            raise RuntimeError("数据库未初始化")
+
+        try:
+            cutoff_time = int(time.time()) - (days * 86400)
+            async with self._conn.execute(
+                "DELETE FROM comupik_forwarded_images WHERE forwarded_at < ?",
+                (cutoff_time,),
+            ) as cursor:
+                deleted = cursor.rowcount
+            await self._conn.commit()
+            logger.info(f"[LuwanDB] 清理了 {deleted} 条旧的转发记录")
+            return deleted
+        except Exception as e:
+            logger.error(f"[LuwanDB] 清理旧转发记录失败: {e}")
+            return 0
+
     async def close(self) -> None:
         """关闭数据库连接"""
         if self._conn:

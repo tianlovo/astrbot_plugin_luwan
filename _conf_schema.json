@@ -50,5 +50,52 @@
     "hint": "开启后，头衔申请将自动批准而不需要群主确认",
     "type": "bool",
     "default": false
+  },
+  "comupik": {
+    "description": "ComuPik 图片转发配置",
+    "hint": "配置 ComuPik 图片收集插件的接入参数，用于将 Telegram 图片转发到 QQ 群",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用图片转发",
+        "hint": "是否启用 ComuPik 图片转发功能",
+        "type": "bool",
+        "default": true
+      },
+      "api_url": {
+        "description": "ComuPik API 地址",
+        "hint": "ComuPik 插件的 API 服务地址，默认 http://127.0.0.1:8080",
+        "type": "string",
+        "default": "http://127.0.0.1:8080"
+      },
+      "target_groups": {
+        "description": "目标 QQ 群列表",
+        "hint": "接收转发图片的 QQ 群号列表，多个群号用逗号分隔",
+        "type": "list",
+        "default": []
+      },
+      "poll_interval": {
+        "description": "轮询间隔（秒）",
+        "hint": "检查新图片的时间间隔，建议 30-60 秒",
+        "type": "int",
+        "slider": {
+          "min": 10,
+          "max": 300,
+          "step": 10
+        },
+        "default": 30
+      },
+      "poll_time_range": {
+        "description": "轮询时间范围（小时）",
+        "hint": "每次轮询获取多少小时内的图片，默认 12 小时",
+        "type": "int",
+        "slider": {
+          "min": 1,
+          "max": 48,
+          "step": 1
+        },
+        "default": 12
+      }
+    }
   }
 }

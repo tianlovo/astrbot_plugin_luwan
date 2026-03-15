@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.3.0] - 2025-03-15
+
+### Added
+
+- feat(comupik): 添加 ComuPik 图片转发功能
+- feat(comupik_client): 实现 ComuPik API 客户端，支持轮询获取图片
+- feat(image_forwarder): 实现图片转发服务，定时轮询并转发到 QQ 群
+- feat(config): 添加 ComuPik 配置项（enabled, api_url, target_groups, poll_interval, poll_time_range）
+- feat(database): 添加 comupik_forwarded_images 表记录已转发图片
+- feat(main): 集成图片转发功能到主插件
+
+### Features
+
+- 支持从 ComuPik 插件获取 Telegram 图片
+- 支持将图片转发到配置的 QQ 群列表
+- 支持启用/禁用开关（默认启用）
+- 支持配置轮询间隔（默认30秒）
+- 支持配置轮询时间范围（默认12小时）
+- 自动记录已转发图片，避免重复转发
+- 优化 exclude_ids 查询，只获取时间范围内的记录
+
 ## [v1.2.10] - 2025-03-15
 
 ### Fixed

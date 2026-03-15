@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.2.8] - 2025-03-15
+
+### Fixed
+
+- fix(main): 将 `yield` 改回 `await`，恢复普通方法调用
+- fix(title_handler): 暂时禁用消息引用功能（注释掉 Comp.Reply）
+- fix(title_handler): 保留 @ 用户功能
+
 ## [v1.2.7] - 2025-03-15
 
 ### Fixed

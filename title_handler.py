@@ -130,17 +130,22 @@ class TitleHandler:
             f"👥 来源群：{group_name}({group_id})\n"
             f"🏷️ 申请头衔：{title}\n"
             f"⏰ 申请时间：{current_time}\n"
-            f"━━━━━━━━━━━━━━\n"
-            f"💡 如需批准，请在群内使用指令：\n"
-            f"   头衔 {title} @{user_name}"
+            f"━━━━━━━━━━━━━━"
         )
 
         try:
-            # 私聊发送给群主
+            # 私聊发送给群主 - 通知消息
             await event.bot.send_private_msg(
                 user_id=int(self.config.forward_target_qq),
                 message=forward_message,
             )
+
+            # 额外发送头衔内容，方便群主复制
+            await event.bot.send_private_msg(
+                user_id=int(self.config.forward_target_qq),
+                message=title,
+            )
+
             logger.info(
                 f"[LuwanPlugin] 已转发头衔申请到 {self.config.forward_target_qq}"
             )

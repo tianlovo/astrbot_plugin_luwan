@@ -62,9 +62,12 @@ class LuwanPlugin(Star):
 
         指令: 菜单 / 帮助 / help
         显示插件的帮助信息和使用说明
+        普通用户显示精简版，管理员显示完整版（含管理指令）
         """
         try:
-            await self.help_handler.show_menu(event)
+            user_id = event.get_sender_id()
+            is_admin = self.cfg.is_admin(user_id)
+            await self.help_handler.show_menu(event, is_admin)
         except Exception as e:
             logger.error(f"[LuwanPlugin] 显示帮助菜单失败: {e}")
             await event.send(event.plain_result("❌ 显示帮助菜单失败，请稍后重试"))

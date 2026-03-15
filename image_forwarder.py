@@ -235,10 +235,10 @@ class ImageForwarder:
             image: 图片信息
         """
         from astrbot.api.event import MessageChain
-        from astrbot.api.platform import PlatformAdapterType
         from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_adapter import (
             AiocqhttpAdapter,
         )
+        from astrbot.core.star.filter.platform_adapter_type import PlatformAdapterType
 
         # 获取 aiocqhttp 平台适配器
         platform = self.context.get_platform(PlatformAdapterType.AIOCQHTTP)

@@ -233,7 +233,7 @@ class ImageForwarder:
             Plain(f"📷 来自 Telegram 的图片\n"),
             Plain(f"👤 发送者: {image.sender_name}\n"),
             Plain(f"📐 尺寸: {image.width}x{image.height}\n"),
-            ImageComponent.fromBytes(image_data, "image/jpeg"),
+            ImageComponent.fromBytes(image_data),
         ]
 
         # 转发到每个目标群

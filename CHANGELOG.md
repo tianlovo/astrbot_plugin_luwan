@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.3.8] - 2025-03-15
+
+### Fixed
+
+- fix(image_forwarder): 修复 AiocqhttpPlatformAdapter 导入路径错误
+- fix(image_forwarder): 模块名应为 aiocqhttp_platform_adapter
+- fix(image_forwarder): 类名应为 AiocqhttpPlatformAdapter
+
+## [v1.3.7] - 2025-03-15
+
+### Fixed
+
+- fix(image_forwarder): 修复 PlatformAdapterType 导入路径错误
+- fix(image_forwarder): 从 astrbot.core.star.filter.platform_adapter_type 导入
+
 ## [v1.3.6] - 2025-03-15
 
 ### Fixed

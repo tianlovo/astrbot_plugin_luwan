@@ -198,17 +198,18 @@ class ImageForwarder:
             self.client._known_ids.add(image.id)
             return
 
+        # 检查 file_path 是否为本地路径
+        file_path = image.file_path
+        if file_path.startswith(("http://", "https://")):
+            logger.warning(
+                f"[ImageForwarder] 图片 {image.id} 的 file_path 是网络 URL，非本地路径，跳过处理: {file_path}"
+            )
+            self.client._known_ids.add(image.id)
+            return
+
         try:
-            # 下载图片
-            filename = Path(image.file_path).name
-            image_data = await self.client.download_image(filename)
-
-            if image_data is None:
-                logger.warning(f"[ImageForwarder] 图片 {image.id} 正在下载中，跳过")
-                return
-
-            # 转发到所有目标群
-            await self._forward_to_groups(image, image_data)
+            # 转发到所有目标群（直接使用 file_path，无需下载）
+            await self._forward_to_groups(image)
 
             # 记录已转发
             await self.db.record_forwarded_image(image.id)
@@ -219,19 +220,18 @@ class ImageForwarder:
         except Exception as e:
             logger.error(f"[ImageForwarder] 处理图片 {image.id} 失败: {e}")
 
-    async def _forward_to_groups(self, image: ImageInfo, image_data: bytes) -> None:
+    async def _forward_to_groups(self, image: ImageInfo) -> None:
         """转发图片到所有目标群
 
         Args:
             image: 图片信息
-            image_data: 图片数据
         """
         import astrbot.api.message_components as Comp
         from astrbot.api.event import MessageChain
 
         # 构建消息链 - 仅发送图片
         chain = MessageChain()
-        chain.append(Comp.Image.fromBytes(image_data))
+        chain.append(Comp.Image.fromFileSystem(image.file_path))
 
         # 转发到每个目标群
         for group_id in self.cfg.comupik_target_groups:

@@ -1,14 +1,134 @@
-# astrbot-plugin-helloworld
+# 鹿丸插件 (astrbot_plugin_luwan)
 
-AstrBot 插件模板 / A template plugin for AstrBot plugin feature
+AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能。
 
-> [!NOTE]
-> This repo is just a template of [AstrBot](https://github.com/AstrBotDevs/AstrBot) Plugin.
-> 
-> [AstrBot](https://github.com/AstrBotDevs/AstrBot) is an agentic assistant for both personal and group conversations. It can be deployed across dozens of mainstream instant messaging platforms, including QQ, Telegram, Feishu, DingTalk, Slack, LINE, Discord, Matrix, etc. In addition, it provides a reliable and extensible conversational AI infrastructure for individuals, developers, and teams. Whether you need a personal AI companion, an intelligent customer support agent, an automation assistant, or an enterprise knowledge base, AstrBot enables you to quickly build AI applications directly within your existing messaging workflows.
+## 功能特性
 
-# Supports
+### 1. 群聊交互功能
+- 响应用户 @机器人的"菜单"或"帮助"指令
+- 返回包含所有可用指令的详细帮助菜单
+- 菜单包含指令格式、功能说明及使用示例
 
-- [AstrBot Repo](https://github.com/AstrBotDevs/AstrBot)
-- [AstrBot Plugin Development Docs (Chinese)](https://docs.astrbot.app/dev/star/plugin-new.html)
-- [AstrBot Plugin Development Docs (English)](https://docs.astrbot.app/en/dev/star/plugin-new.html)
+### 2. 头衔申请功能
+- 用户可通过 @机器人发送"申请头衔 xxx"申请群头衔
+- 系统自动将申请信息转发至预设的群主QQ
+- 向用户返回"已通知群主"等标准化响应
+- **防骚扰机制**：
+  - 限制同一用户频繁申请（可配置时间间隔）
+  - 限制每日申请次数上限
+  - 触发限制时给出明确提示
+- 支持已获得头衔用户的头衔更换功能
+
+### 3. 管理配置功能
+- 超级管理员可通过指令查看和修改插件配置
+- 支持 AstrBot WebUI 管理面板可视化配置
+- 配置项包括：
+  - 头衔申请转发目标QQ
+  - 申请频率限制参数（间隔、日上限）
+  - 指令前缀
+  - 超级管理员QQ
+  - 自动批准开关
+
+## 安装方法
+
+1. 将本插件文件夹复制到 AstrBot 的 `data/plugins/` 目录下
+2. 重启 AstrBot 或在 WebUI 中重载插件
+3. 在 WebUI 配置页面设置插件参数
+
+## 配置说明
+
+### WebUI 可视化配置
+
+在 AstrBot 管理面板的「配置」页面，找到「鹿丸插件」配置卡片：
+
+| 配置项 | 类型 | 说明 | 默认值 |
+|--------|------|------|--------|
+| 头衔申请转发目标QQ | string | 接收头衔申请通知的群主QQ号 | 空 |
+| 指令前缀 | string | 触发插件指令的前缀字符 | 空 |
+| 频率限制配置 | object | 防骚扰机制参数 | - |
+| ├─ 最小申请间隔 | int | 两次申请的最小间隔（分钟） | 5 |
+| ├─ 每日申请次数上限 | int | 每日最多申请次数 | 3 |
+| 超级管理员QQ号 | string | 拥有插件管理权限的QQ号 | 空 |
+| 自动批准头衔申请 | bool | 开启后自动批准申请 | false |
+
+### 配置文件位置
+
+插件配置存储在：`data/config/astrbot_plugin_luwan_config.json`
+
+## 指令列表
+
+### 基础指令
+
+| 指令 | 别名 | 参数 | 权限 | 说明 |
+|------|------|------|------|------|
+| 菜单 | 帮助, help | 无 | 成员 | 显示帮助菜单 |
+
+### 头衔申请指令
+
+| 指令 | 别名 | 参数 | 权限 | 说明 |
+|------|------|------|------|------|
+| 申请头衔 | 我要头衔 | 头衔名称 | 成员 | 申请新的群头衔 |
+| 换头衔 | 更换头衔 | 新头衔名称 | 成员 | 更换已有的群头衔 |
+
+**使用示例：**
+```
+@机器人 申请头衔 小可爱
+@机器人 我要头衔 小可爱
+@机器人 换头衔 大可爱
+```
+
+### 管理员指令
+
+| 指令 | 别名 | 参数 | 权限 | 说明 |
+|------|------|------|------|------|
+| 鹿丸配置 | lw配置 | 无 | 超级管理员 | 查看当前配置 |
+| 鹿丸配置 | lw配置 | 配置项 值 | 超级管理员 | 修改配置 |
+
+**使用示例：**
+```
+@机器人 鹿丸配置
+@机器人 鹿丸配置 forward_target_qq 123456789
+@机器人 鹿丸配置 auto_approve true
+```
+
+## 权限说明
+
+- **成员**：可使用菜单、申请头衔、换头衔指令
+- **超级管理员**：可查看和修改插件配置
+  - 超级管理员包括：
+    - AstrBot 配置中 `admins_id` 列表中的用户
+    - 插件配置中 `super_admin` 指定的QQ号
+
+## 技术说明
+
+- 仅支持 `aiocqhttp` 平台适配器（QQ 个人号）
+- 使用 SQLite 数据库持久化存储申请记录和频率限制数据
+- 数据库文件位置：`data/astrbot_plugin_luwan/luwan_data.db`
+
+## 注意事项
+
+1. 使用前必须在 WebUI 中配置「头衔申请转发目标QQ」，否则无法转发申请
+2. 头衔申请需要群主手动批准（除非开启自动批准）
+3. 频率限制默认：最小间隔 5 分钟，每日上限 3 次
+4. 所有指令均需要在群聊中使用
+
+## 更新日志
+
+### v1.0.0
+- 初始版本发布
+- 实现基础帮助菜单功能
+- 实现头衔申请与转发功能
+- 实现防骚扰机制
+- 实现管理配置功能
+- 支持 WebUI 可视化配置
+
+## 支持与反馈
+
+如有问题或建议，请联系插件开发者。
+
+---
+
+**插件名称**：鹿丸插件 (astrbot_plugin_luwan)  
+**版本**：v1.0.0  
+**作者**：Luwan  
+**适用平台**：aiocqhttp (QQ 个人号)

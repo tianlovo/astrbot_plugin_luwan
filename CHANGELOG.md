@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.2.6] - 2025-03-15
+
+### Fixed
+
+- fix: 移除多处 event.stop_event() 调用，修复消息发送问题
+- fix(main): 移除 manage_title 中的 event.stop_event()
+- fix(main): 移除 show_config 中的 event.stop_event()
+- fix(main): 移除 clear_rate_limit 中的 event.stop_event()
+- fix(help_handler): 移除 send_help 中的 event.stop_event()
+
 ## [v1.2.5] - 2025-03-15
 
 ### Fixed

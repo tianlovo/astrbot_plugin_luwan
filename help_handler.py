@@ -102,7 +102,6 @@ class HelpHandler:
         """
         help_text = self.get_help_text(is_admin)
         await event.send(event.plain_result(help_text))
-        event.stop_event()
 
     def update_rate_limit(self, min_interval: int, daily_limit: int) -> None:
         """更新频率限制显示参数

@@ -74,7 +74,6 @@ class TitleHandler:
         is_valid, error_msg = self._validate_title(title)
         if not is_valid:
             await event.send(event.plain_result(error_msg))
-            event.stop_event()
             return
 
         # 检查频率限制
@@ -84,7 +83,6 @@ class TitleHandler:
 
         if not can_apply:
             await event.send(event.plain_result(message))
-            event.stop_event()
             return
 
         # 检查是否设置了转发目标
@@ -92,14 +90,12 @@ class TitleHandler:
             await event.send(
                 event.plain_result("❌ 插件未配置转发目标QQ，请联系管理员配置")
             )
-            event.stop_event()
             return
 
         # 记录申请到数据库
         success = await self.db.add_application(user_id, group_id, title)
         if not success:
             await event.send(event.plain_result("❌ 申请记录失败，请稍后重试"))
-            event.stop_event()
             return
 
         # 记录频率限制
@@ -234,7 +230,6 @@ class TitleHandler:
 
         if not can_apply:
             await event.send(event.plain_result(message))
-            event.stop_event()
             return
 
         # 检查是否设置了转发目标
@@ -242,7 +237,6 @@ class TitleHandler:
             await event.send(
                 event.plain_result("❌ 插件未配置转发目标QQ，请联系管理员配置")
             )
-            event.stop_event()
             return
 
         # 记录频率限制

@@ -21,7 +21,7 @@ from .title_handler import TitleHandler
     "astrbot_plugin_luwan",
     "Luwan",
     "AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能",
-    "1.2.5",
+    "1.2.6",
 )
 class LuwanPlugin(Star):
     """鹿丸插件主类
@@ -113,7 +113,6 @@ class LuwanPlugin(Star):
                         "  头衔 无（移除头衔）"
                     )
                 )
-                event.stop_event()
                 return
 
             # 检查是否为移除头衔操作
@@ -123,9 +122,6 @@ class LuwanPlugin(Star):
             else:
                 async for _ in self.title_handler.handle_apply_title(event, title):
                     pass
-
-            # 停止事件传播
-            event.stop_event()
         except Exception as e:
             logger.error(f"[LuwanPlugin] 处理头衔管理失败: {e}")
             await event.send(event.plain_result("❌ 操作失败，请稍后重试"))
@@ -148,7 +144,6 @@ class LuwanPlugin(Star):
         # 检查权限
         if not self.cfg.is_admin(user_id):
             await event.send(event.plain_result("❌ 你没有权限执行此操作"))
-            event.stop_event()
             return
 
         try:
@@ -177,7 +172,6 @@ class LuwanPlugin(Star):
                     )
                 )
 
-            event.stop_event()
         except Exception as e:
             logger.error(f"[LuwanPlugin] 处理配置指令失败: {e}")
             await event.send(event.plain_result("❌ 操作失败，请稍后重试"))
@@ -265,7 +259,6 @@ class LuwanPlugin(Star):
         # 检查权限
         if not self.cfg.is_admin(user_id):
             await event.send(event.plain_result("❌ 你没有权限执行此操作"))
-            event.stop_event()
             return
 
         try:
@@ -291,7 +284,6 @@ class LuwanPlugin(Star):
                 else:
                     await event.send(event.plain_result("❌ 清空限制失败"))
 
-            event.stop_event()
         except Exception as e:
             logger.error(f"[LuwanPlugin] 清空限制失败: {e}")
             await event.send(event.plain_result("❌ 操作失败，请稍后重试"))

@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.3.2] - 2025-03-15
+
+### Changed
+
+- refactor(image_forwarder): 使用 MessageChain 构建消息
+- refactor(image_forwarder): 使用 self.context.send_message() 发送主动消息
+- refactor(image_forwarder): 仅发送图片，移除文字描述
+
+## [v1.3.1] - 2025-03-15
+
+### Fixed
+
+- fix(image_forwarder): 修复 Image.fromBytes() 参数错误
+- fix(image_forwarder): 移除多余的 MIME 类型参数
+
 ## [v1.3.0] - 2025-03-15
 
 ### Added

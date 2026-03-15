@@ -226,27 +226,21 @@ class ImageForwarder:
             image: 图片信息
             image_data: 图片数据
         """
-        from astrbot.core.message.components import Image as ImageComponent, Plain
+        import astrbot.api.message_components as Comp
+        from astrbot.api.event import MessageChain
 
-        # 构建消息
-        message = [
-            Plain(f"📷 来自 Telegram 的图片\n"),
-            Plain(f"👤 发送者: {image.sender_name}\n"),
-            Plain(f"📐 尺寸: {image.width}x{image.height}\n"),
-            ImageComponent.fromBytes(image_data),
-        ]
+        # 构建消息链 - 仅发送图片
+        chain = MessageChain()
+        chain.append(Comp.Image.fromBytes(image_data))
 
         # 转发到每个目标群
         for group_id in self.cfg.comupik_target_groups:
             try:
-                # 获取平台适配器
-                platform = self.context.get_platform("aiocqhttp")
-                if not platform:
-                    logger.error(f"[ImageForwarder] 无法获取 aiocqhttp 平台适配器")
-                    continue
+                # 构建 unified_msg_origin
+                umo = f"aiocqhttp:GroupMessage:{group_id}"
 
-                # 发送消息到群
-                await platform.send_group_message(group_id, message)
+                # 使用 context 发送主动消息
+                await self.context.send_message(umo, chain)
                 logger.info(f"[ImageForwarder] 已转发图片 {image.id} 到群 {group_id}")
 
             except Exception as e:

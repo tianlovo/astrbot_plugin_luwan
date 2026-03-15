@@ -1,7 +1,7 @@
 name: astrbot_plugin_luwan
 display_name: 鹿丸插件
 desc: AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能
-version: v1.3.8
+version: v1.3.9
 author: Luwan
 repo: https://github.com/tianlovo/astrbot_plugin_luwan
 support_platforms:

@@ -236,7 +236,7 @@ class ImageForwarder:
         """
         from astrbot.api.event import MessageChain
         from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_platform_adapter import (
-            AiocqhttpPlatformAdapter,
+            AiocqhttpAdapter,
         )
         from astrbot.core.star.filter.platform_adapter_type import PlatformAdapterType
 
@@ -247,7 +247,7 @@ class ImageForwarder:
             return
 
         # 判断是否为 AiocqhttpAdapter 实例
-        if not isinstance(platform, AiocqhttpPlatformAdapter):
+        if not isinstance(platform, AiocqhttpAdapter):
             logger.error(f"[ImageForwarder] 平台适配器类型不匹配: {type(platform)}")
             return
 

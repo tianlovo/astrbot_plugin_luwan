@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.6.3] - 2025-03-19
+
+### Fixed
+
+- fix(test): 修复测试分享消息 chain 构建方式
+
 ## [v1.6.2] - 2025-03-19
 
 ### Added

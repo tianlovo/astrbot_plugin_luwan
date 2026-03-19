@@ -55,8 +55,8 @@ class TestHandler:
         title = "桑多涅 Jeb Nid Nid 【原神MMD】"
         content = "测试分享内容"
 
-        chain = Comp.MessageChain().append(
+        chain = [
             Comp.Share(url=url, title=title, content=content, image=None)
-        )
-        await event.send(chain)
+        ]
+        await event.send(event.chain_result(chain))
         logger.info("[LuwanPlugin] 测试分享消息已发送")

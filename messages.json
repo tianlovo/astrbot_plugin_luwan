@@ -1,0 +1,172 @@
+{
+    "common": {
+        "divider": "━━━━━━━━━━━━━━",
+        "success": "✅ 成功",
+        "error": "❌ 错误",
+        "retry_later": "请稍后重试",
+        "action": {
+            "apply": "申请",
+            "change": "更换",
+            "remove": "移除"
+        }
+    },
+    "title": {
+        "error": {
+            "no_name": "❌ 请输入头衔名称",
+            "has_space": "❌ 头衔不能包含空格",
+            "too_long": "❌ 头衔长度不能超过5个字符",
+            "no_target": "❌ 插件未配置转发目标QQ，请联系管理员配置",
+            "record_failed": "❌ 申请记录失败，请稍后重试",
+            "operation_failed": "❌ 操作失败，请稍后重试"
+        },
+        "apply": {
+            "success": "\n✅ 已{action}头衔「{title}」\n📢 已通知群主处理，请耐心等待",
+            "remove_success": "\n✅ 已申请移除头衔\n📢 已通知群主处理，请耐心等待"
+        },
+        "forward": {
+            "apply_title": "📋 头衔{action}通知\n{divider}\n👤 申请人：{user_name}({user_id})\n👥 来源群：{group_name}({group_id})\n🏷️ 申请头衔：{title}\n⏰ 申请时间：{time}\n{divider}",
+            "remove_title": "📋 头衔移除通知\n{divider}\n👤 申请人：{user_name}({user_id})\n👥 来源群：{group_name}({group_id})\n🏷️ 操作：移除头衔\n⏰ 申请时间：{time}\n{divider}"
+        },
+        "hint": {
+            "usage": "示例：\n  头衔 小可爱（申请/更换）\n  头衔 无（移除头衔）"
+        }
+    },
+    "checkin": {
+        "error": {
+            "not_initialized": "❌ 群打卡功能尚未初始化",
+            "not_admin": "❌ 仅超级管理员可查看打卡状态",
+            "checkin_failed": "❌ 打卡失败，请稍后重试",
+            "not_in_list": "❌ 当前群不在打卡列表中",
+            "permission_denied": "❌ 打卡失败，请检查机器人权限",
+            "bot_not_ready": "❌ Bot实例未就绪，请稍后重试",
+            "get_status_failed": "❌ 获取打卡状态失败"
+        },
+        "success": {
+            "already_done": "✅ 今天已经打卡过了",
+            "checkin_success": "✅ 打卡成功"
+        },
+        "status": {
+            "title": "📊 群打卡状态",
+            "group_id": "👥 群号: {group_id}",
+            "in_list": "📋 在打卡列表: {in_list}",
+            "today_status": "{status_text}",
+            "scheduled_time": "🕐 计划时间: {time}",
+            "timezone": "🌍 时区: {timezone}",
+            "time_range": "⏰ 打卡时段: {start} - {end}",
+            "desire": "💫 打卡欲望: {desire}%",
+            "guarantee": "🛡️ 保底功能: {status}",
+            "guarantee_time": "🕐 保底时间: {time}",
+            "already_checked": "✅ 今日已打卡",
+            "not_checked": "⏳ 今日未打卡",
+            "in_list_yes": "✅ 是",
+            "in_list_no": "❌ 否",
+            "guarantee_enabled": "✅ 开启",
+            "guarantee_disabled": "❌ 关闭"
+        },
+        "notify": {
+            "failed": "⚠️ 群打卡失败通知\n{divider}\n群号: {group_id}\n类型: {type}打卡\n状态: 连续3次打卡失败\n时间: {time}\n{divider}\n请检查机器人状态或群权限"
+        },
+        "log": {
+            "check_loop_start": "[GroupCheckin] 开始检查循环，每分钟检查一次",
+            "service_started": "[GroupCheckin] 服务已启动",
+            "service_stopped": "[GroupCheckin] 服务已停止",
+            "bot_instance_set": "[GroupCheckin] Bot实例已设置",
+            "disabled": "[GroupCheckin] 群打卡功能已禁用",
+            "no_groups_configured": "[GroupCheckin] 打卡群列表未配置",
+            "initialized": "[GroupCheckin] 初始化完成，共 {count} 个群，时区: {timezone} (UTC{offset})，时间段: {start}-{end}，欲望: {desire}%，保底功能: {guarantee}",
+            "all_times_used": "[GroupCheckin] 群 {group_id} 所有时间点都已使用，清空历史重新开始",
+            "scheduled": "[GroupCheckin] 群 {group_id} 计划打卡时间: {time} ({timezone}) -> 本地时间: {local_time} (已使用 {used}/{total} 个时间点)",
+            "service_already_running": "[GroupCheckin] 服务已在运行中",
+            "check_error": "[GroupCheckin] 检查打卡出错: {error}",
+            "check_loop_log_header": "[GroupCheckin] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            "next_checkin_times": "[GroupCheckin] 各群下次打卡时间 (配置时区 {timezone}: {config_time}, 本地: {local_time}):",
+            "current_time_only": "[GroupCheckin] 各群下次打卡时间 (当前时间: {time}):",
+            "group_status_completed": "今日已完成",
+            "group_status_failed": "已失败3次",
+            "group_status_scheduled": "计划{time}",
+            "group_status_with_retry": "计划{time} (已尝试{attempts}次，下次{next_time}重试)",
+            "guarantee_check_time": "[GroupCheckin]   保底检查时间: {time}",
+            "trigger_guarantee": "[GroupCheckin] 群 {group_id} 触发保底打卡",
+            "desire_not_triggered": "[GroupCheckin] 群 {group_id} 欲望未触发，跳过打卡 (desire: {desire})",
+            "max_retries_reached": "[GroupCheckin] 群 {group_id} 已尝试{max_retries}次，不再重试",
+            "checkin_success": "[GroupCheckin] 群 {group_id} 打卡成功",
+            "checkin_failed_retry": "[GroupCheckin] 群 {group_id} 打卡失败，第{attempt}次尝试，已重新安排时间",
+            "notify_admin": "[GroupCheckin] 已通知超级管理员 {admin}",
+            "notify_admin_failed": "[GroupCheckin] 通知管理员失败: {error}",
+            "no_admin_configured": "[GroupCheckin] 未配置超级管理员，无法通知",
+            "timezone_convert_failed": "[GroupCheckin] 时区转换失败: {error}，使用原始时间",
+            "get_config_time_failed": "[GroupCheckin] 获取配置时区时间失败: {error}，使用本地时间",
+            "get_config_date_failed": "[GroupCheckin] 获取配置时区日期失败: {error}，使用本地日期",
+            "already_checked_today_skip": "[GroupCheckin] 群 {group_id} 今日已有人打卡，跳过保底",
+            "no_checkin_today_trigger": "[GroupCheckin] 群 {group_id} 今日无人打卡，触发保底",
+            "query_signin_info_failed": "[GroupCheckin] 查询群打卡信息失败: {error}",
+            "cannot_confirm_status": "[GroupCheckin] 无法确认群 {group_id} 打卡状态，按无人打卡处理",
+            "signin_count": "[GroupCheckin] 群 {group_id} 今日有 {count} 人打卡",
+            "time_format_error": "[GroupCheckin] 时间格式解析失败: {current}, {start}, {end}",
+            "bot_instance_not_set": "[GroupCheckin] Bot实例未设置，无法执行打卡",
+            "do_checkin_success": "[GroupCheckin] 已在群 {group_id} 完成{type}打卡",
+            "do_checkin_failed": "[GroupCheckin] 在群 {group_id} 打卡失败: {error}"
+        }
+    },
+    "image": {
+        "log": {
+            "forwarder_disabled": "[ImageForwarder] 图片转发功能已禁用",
+            "api_not_configured": "[ImageForwarder] ComuPik API 地址未配置",
+            "target_groups_not_configured": "[ImageForwarder] 目标 QQ 群列表未配置",
+            "api_unavailable": "[ImageForwarder] ComuPik API 服务不可用: {url}",
+            "initialized": "[ImageForwarder] 初始化完成，API: {url}, 目标群: {groups}",
+            "init_failed": "[ImageForwarder] 初始化失败: {error}",
+            "service_already_running": "[ImageForwarder] 服务已在运行中",
+            "service_not_initialized": "[ImageForwarder] 服务未初始化",
+            "service_started": "[ImageForwarder] 服务已启动",
+            "service_stopped": "[ImageForwarder] 服务已停止",
+            "poll_loop_start": "[ImageForwarder] 开始轮询，间隔: {interval}秒, 时间范围: {time_range}小时",
+            "poll_error": "[ImageForwarder] 轮询出错: {error}",
+            "get_images_failed": "[ImageForwarder] 获取图片列表失败: {error}",
+            "found_new_images": "[ImageForwarder] 发现 {count} 张新图片 (总计 {total})",
+            "image_status_unavailable": "[ImageForwarder] 图片 {id} 状态不可用: {status}",
+            "image_path_is_url": "[ImageForwarder] 图片 {id} 的 file_path 是网络 URL，非本地路径，跳过处理: {path}",
+            "image_file_not_exists": "[ImageForwarder] 图片 {id} 的物理文件不存在，跳过处理: {path}",
+            "forward_success": "[ImageForwarder] 图片 {id} 转发完成",
+            "process_image_failed": "[ImageForwarder] 处理图片 {id} 失败: {error}",
+            "get_platform_adapter_failed": "[ImageForwarder] 无法获取 aiocqhttp 平台适配器",
+            "adapter_type_mismatch": "[ImageForwarder] 平台适配器类型不匹配: {type}",
+            "using_adapter": "[ImageForwarder] 使用平台适配器: {id}",
+            "forward_to_group_success": "[ImageForwarder] 已转发图片 {image_id} 到群 {group_id}",
+            "forward_to_group_failed": "[ImageForwarder] 转发图片 {image_id} 到群 {group_id} 失败: {error}"
+        }
+    },
+    "db": {
+        "log": {
+            "init_complete": "[LuwanDB] 数据库初始化完成: {path}",
+            "add_application_failed": "[LuwanDB] 添加申请记录失败: {error}",
+            "update_status_failed": "[LuwanDB] 更新申请状态失败: {error}",
+            "clear_user_limit": "[LuwanDB] 已清空用户 {user_id} 的申请限制",
+            "clear_all_limits": "[LuwanDB] 已清空所有用户的申请限制",
+            "clear_limits_failed": "[LuwanDB] 清空申请限制失败: {error}",
+            "comupik_init_complete": "[LuwanDB] ComuPik 相关表初始化完成",
+            "comupik_init_failed": "[LuwanDB] ComuPik 表初始化失败: {error}",
+            "check_forward_status_failed": "[LuwanDB] 检查图片转发状态失败: {error}",
+            "record_forward_status_failed": "[LuwanDB] 记录图片转发状态失败: {error}",
+            "get_forwarded_ids_failed": "[LuwanDB] 获取已转发图片ID失败: {error}",
+            "cleanup_forwarded_records": "[LuwanDB] 清理了 {count} 条旧的转发记录",
+            "cleanup_forwarded_failed": "[LuwanDB] 清理旧转发记录失败: {error}",
+            "checkin_init_complete": "[LuwanDB] 群打卡相关表初始化完成",
+            "checkin_init_failed": "[LuwanDB] 群打卡表初始化失败: {error}",
+            "check_checkin_status_failed": "[LuwanDB] 检查群打卡状态失败: {error}",
+            "record_checkin_failed": "[LuwanDB] 记录群打卡失败: {error}",
+            "get_checkin_history_failed": "[LuwanDB] 获取群打卡历史失败: {error}",
+            "cleanup_checkin_records": "[LuwanDB] 清理了 {count} 条旧的打卡记录",
+            "cleanup_checkin_failed": "[LuwanDB] 清理旧打卡记录失败: {error}",
+            "db_closed": "[LuwanDB] 数据库连接已关闭"
+        },
+        "rate_limit": {
+            "too_frequent": "申请太频繁啦，请等待 {minutes} 分钟后再试",
+            "daily_limit_reached": "今日申请次数已达上限 ({limit} 次)，请明天再试"
+        }
+    },
+    "help": {
+        "menu_user": "📋 指令列表\n━━━━━━━━━━━━━━\n• 菜单 / 帮助 / help\n  显示本帮助菜单\n\n🏷️ 头衔管理\n━━━━━━━━━━━━━━\n• 头衔 <名称>\n  别名：申请头衔、我要头衔、换头衔、更换头衔\n  示例：\n    头衔 小可爱（申请/更换）\n    头衔 无（移除头衔）\n\n⚠️ 限制：间隔 {min_interval} 分钟，每日 {daily_limit} 次",
+        "menu_admin": "📋 指令列表\n━━━━━━━━━━━━━━\n• 菜单 / 帮助 / help\n  显示本帮助菜单\n\n🏷️ 头衔管理\n━━━━━━━━━━━━━━\n• 头衔 <名称>\n  别名：申请头衔、我要头衔、换头衔、更换头衔\n  示例：\n    头衔 小可爱（申请/更换）\n    头衔 无（移除头衔）\n\n⚠️ 限制：间隔 {min_interval} 分钟，每日 {daily_limit} 次\n\n⚙️ 管理说明\n━━━━━━━━━━━━━━\n配置管理请使用 AstrBot WebUI\n\n📍 群打卡功能\n━━━━━━━━━━━━━━\n机器人会在配置的时间段内\n随机打卡到指定QQ群\n（在WebUI中配置群列表、时间段和欲望）"
+    }
+}

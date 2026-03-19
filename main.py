@@ -14,6 +14,7 @@ from astrbot.core.star.filter.event_message_type import EventMessageType
 from .command import HelpHandler, TitleHandler
 from .config import LuwanConfig
 from .database import LuwanDB
+from .messages import Messages
 from .service import GroupCheckinService, ImageForwarder
 
 
@@ -21,7 +22,7 @@ from .service import GroupCheckinService, ImageForwarder
     "astrbot_plugin_luwan",
     "Luwan",
     "AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能",
-    "1.5.8",
+    "1.5.9",
 )
 class LuwanPlugin(Star):
     """鹿丸插件主类
@@ -85,7 +86,9 @@ class LuwanPlugin(Star):
             await self.help_handler.show_menu(event, is_admin)
         except Exception as e:
             logger.error(f"[LuwanPlugin] 显示帮助菜单失败: {e}")
-            await event.send(event.plain_result("❌ 显示帮助菜单失败，请稍后重试"))
+            await event.send(
+                event.plain_result(Messages.get("common.error.operation_failed"))
+            )
 
     # ==================== 头衔管理指令 ====================
 
@@ -102,7 +105,9 @@ class LuwanPlugin(Star):
           - 头衔 取消（移除头衔）
         """
         if not self.title_handler:
-            await event.send(event.plain_result("❌ 插件尚未初始化完成，请稍后重试"))
+            await event.send(
+                event.plain_result(Messages.get("common.error.operation_failed"))
+            )
             return
 
         try:
@@ -122,10 +127,9 @@ class LuwanPlugin(Star):
             if title is None:
                 await event.send(
                     event.plain_result(
-                        "❌ 请输入头衔名称\n"
-                        "示例：\n"
-                        "  头衔 小可爱（申请/更换）\n"
-                        "  头衔 无（移除头衔）"
+                        Messages.get("title.error.no_name")
+                        + "\n"
+                        + Messages.get("title.hint.usage")
                     )
                 )
                 return
@@ -137,7 +141,9 @@ class LuwanPlugin(Star):
                 await self.title_handler.handle_apply_title(event, title)
         except Exception as e:
             logger.error(f"[LuwanPlugin] 处理头衔管理失败: {e}")
-            await event.send(event.plain_result("❌ 操作失败，请稍后重试"))
+            await event.send(
+                event.plain_result(Messages.get("title.error.operation_failed"))
+            )
 
     # ==================== 群打卡指令 ====================
 
@@ -153,7 +159,9 @@ class LuwanPlugin(Star):
           - @机器人 打卡 状态（仅超级管理员，显示打卡状态）
         """
         if not self.group_checkin:
-            await event.send(event.plain_result("❌ 群打卡功能尚未初始化"))
+            await event.send(
+                event.plain_result(Messages.get("checkin.error.not_initialized"))
+            )
             return
 
         try:
@@ -167,7 +175,7 @@ class LuwanPlugin(Star):
                 # 仅超级管理员可使用
                 if not self.cfg.is_admin(user_id):
                     await event.send(
-                        event.plain_result("❌ 仅超级管理员可查看打卡状态")
+                        event.plain_result(Messages.get("checkin.error.not_admin"))
                     )
                     return
                 await self._show_checkin_status(event, group_id)
@@ -178,7 +186,9 @@ class LuwanPlugin(Star):
 
         except Exception as e:
             logger.error(f"[LuwanPlugin] 处理打卡命令失败: {e}")
-            await event.send(event.plain_result("❌ 打卡失败，请稍后重试"))
+            await event.send(
+                event.plain_result(Messages.get("checkin.error.checkin_failed"))
+            )
 
     async def _do_manual_checkin(
         self, event: AiocqhttpMessageEvent, group_id: str
@@ -192,13 +202,17 @@ class LuwanPlugin(Star):
         try:
             # 检查群是否在打卡列表中
             if group_id not in self.cfg.group_checkin_target_groups:
-                await event.send(event.plain_result("❌ 当前群不在打卡列表中"))
+                await event.send(
+                    event.plain_result(Messages.get("checkin.error.not_in_list"))
+                )
                 return
 
             # 检查今天是否已经打卡
             already_checkin = await self.db.is_group_checked_in_today(group_id)
             if already_checkin:
-                await event.send(event.plain_result("✅ 今天已经打卡过了"))
+                await event.send(
+                    event.plain_result(Messages.get("checkin.success.already_done"))
+                )
                 return
 
             # 执行打卡
@@ -207,17 +221,27 @@ class LuwanPlugin(Star):
                     group_id, checkin_type="manual"
                 )
                 if success:
-                    await event.send(event.plain_result("✅ 打卡成功"))
+                    await event.send(
+                        event.plain_result(
+                            Messages.get("checkin.success.checkin_success")
+                        )
+                    )
                 else:
                     await event.send(
-                        event.plain_result("❌ 打卡失败，请检查机器人权限")
+                        event.plain_result(
+                            Messages.get("checkin.error.permission_denied")
+                        )
                     )
             else:
-                await event.send(event.plain_result("❌ Bot实例未就绪，请稍后重试"))
+                await event.send(
+                    event.plain_result(Messages.get("checkin.error.bot_not_ready"))
+                )
 
         except Exception as e:
             logger.error(f"[LuwanPlugin] 手动打卡失败: {e}")
-            await event.send(event.plain_result("❌ 打卡失败，请稍后重试"))
+            await event.send(
+                event.plain_result(Messages.get("checkin.error.checkin_failed"))
+            )
 
     async def _show_checkin_status(
         self, event: AiocqhttpMessageEvent, group_id: str
@@ -253,34 +277,49 @@ class LuwanPlugin(Star):
                 scheduled_time = self.group_checkin._scheduled_times[group_id]
 
             # 构建状态消息
-            status_text = "✅ 今日已打卡" if already_checkin else "⏳ 今日未打卡"
-            in_list_text = "✅ 是" if in_list else "❌ 否"
-            guarantee_text = "✅ 开启" if enable_guarantee else "❌ 关闭"
+            status_text = (
+                Messages.get("checkin.status.already_checked")
+                if already_checkin
+                else Messages.get("checkin.status.not_checked")
+            )
+            in_list_text = (
+                Messages.get("checkin.status.in_list_yes")
+                if in_list
+                else Messages.get("checkin.status.in_list_no")
+            )
+            guarantee_text = (
+                Messages.get("checkin.status.guarantee_enabled")
+                if enable_guarantee
+                else Messages.get("checkin.status.guarantee_disabled")
+            )
+            divider = Messages.get("common.divider")
 
             message = (
-                f"📊 群打卡状态\n"
-                f"━━━━━━━━━━━━━━\n"
-                f"👥 群号: {group_id}\n"
-                f"📋 在打卡列表: {in_list_text}\n"
-                f"{status_text}\n"
-                f"🕐 计划时间: {scheduled_time}\n"
-                f"━━━━━━━━━━━━━━\n"
-                f"🌍 时区: {timezone}\n"
-                f"⏰ 打卡时段: {start_time} - {end_time}\n"
-                f"💫 打卡欲望: {desire}%\n"
-                f"🛡️ 保底功能: {guarantee_text}\n"
+                f"{Messages.get('checkin.status.title')}\n"
+                f"{divider}\n"
+                f"{Messages.get('checkin.status.group_id', group_id=group_id)}\n"
+                f"{Messages.get('checkin.status.in_list', in_list=in_list_text)}\n"
+                f"{Messages.get('checkin.status.today_status', status_text=status_text)}\n"
+                f"{Messages.get('checkin.status.scheduled_time', time=scheduled_time)}\n"
+                f"{divider}\n"
+                f"{Messages.get('checkin.status.timezone', timezone=timezone)}\n"
+                f"{Messages.get('checkin.status.time_range', start=start_time, end=end_time)}\n"
+                f"{Messages.get('checkin.status.desire', desire=desire)}\n"
+                f"{Messages.get('checkin.status.guarantee', status=guarantee_text)}\n"
             )
 
             if enable_guarantee:
-                message += f"🕐 保底时间: {guarantee_time}\n"
+                message += f"{Messages.get('checkin.status.guarantee_time', time=guarantee_time)}\n"
 
-            message += "━━━━━━━━━━━━━━"
+            message += divider
 
             await event.send(event.plain_result(message))
 
         except Exception as e:
             logger.error(f"[LuwanPlugin] 显示打卡状态失败: {e}")
-            await event.send(event.plain_result("❌ 获取打卡状态失败"))
+            await event.send(
+                event.plain_result(Messages.get("checkin.error.get_status_failed"))
+            )
 
     # ==================== Bot实例捕获 ====================
 

@@ -14,6 +14,7 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
 
 from ..config import LuwanConfig
 from ..database import LuwanDB
+from ..messages import Messages
 
 
 class TitleHandler:
@@ -43,15 +44,15 @@ class TitleHandler:
         """
         # 检查是否为空
         if not title:
-            return False, "❌ 请输入头衔名称"
+            return False, Messages.get("title.error.no_name")
 
         # 检查是否包含空格
         if " " in title or "\u3000" in title:
-            return False, "❌ 头衔不能包含空格"
+            return False, Messages.get("title.error.has_space")
 
         # 检查长度（单字母、单空格等都算一个字符）
         if len(title) > 5:
-            return False, "❌ 头衔长度不能超过5个字符"
+            return False, Messages.get("title.error.too_long")
 
         return True, ""
 
@@ -86,15 +87,15 @@ class TitleHandler:
 
         # 检查是否设置了转发目标
         if not self.config.forward_target_qq:
-            await event.send(
-                event.plain_result("❌ 插件未配置转发目标QQ，请联系管理员配置")
-            )
+            await event.send(event.plain_result(Messages.get("title.error.no_target")))
             return
 
         # 记录申请到数据库
         success = await self.db.add_application(user_id, group_id, title)
         if not success:
-            await event.send(event.plain_result("❌ 申请记录失败，请稍后重试"))
+            await event.send(
+                event.plain_result(Messages.get("title.error.record_failed"))
+            )
             return
 
         # 记录频率限制
@@ -106,7 +107,11 @@ class TitleHandler:
         )
 
         # 返回用户响应（引用消息并 @ 用户）
-        action_text = "更换" if is_change else "申请"
+        action_text = (
+            Messages.get("common.action.change")
+            if is_change
+            else Messages.get("common.action.apply")
+        )
         message_id = event.message_obj.message_id
         user_id = event.get_sender_id()
 
@@ -115,7 +120,7 @@ class TitleHandler:
             Comp.Reply(id=message_id),
             Comp.At(qq=user_id),
             Comp.Plain(
-                f"\n✅ 已{action_text}头衔「{title}」\n📢 已通知群主处理，请耐心等待"
+                Messages.get("title.apply.success", action=action_text, title=title)
             ),
         ]
         await event.send(event.chain_result(chain))
@@ -154,17 +159,24 @@ class TitleHandler:
             group_name = group_id
 
         # 构建转发消息
-        action_text = "更换" if is_change else "申请"
+        action_text = (
+            Messages.get("common.action.change")
+            if is_change
+            else Messages.get("common.action.apply")
+        )
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        divider = Messages.get("common.divider")
 
-        forward_message = (
-            f"📋 头衔{action_text}通知\n"
-            f"━━━━━━━━━━━━━━\n"
-            f"👤 申请人：{user_name}({user_id})\n"
-            f"👥 来源群：{group_name}({group_id})\n"
-            f"🏷️ 申请头衔：{title}\n"
-            f"⏰ 申请时间：{current_time}\n"
-            f"━━━━━━━━━━━━━━"
+        forward_message = Messages.get(
+            "title.forward.apply_title",
+            action=action_text,
+            divider=divider,
+            user_name=user_name,
+            user_id=user_id,
+            group_name=group_name,
+            group_id=group_id,
+            title=title,
+            time=current_time,
         )
 
         try:
@@ -235,9 +247,7 @@ class TitleHandler:
 
         # 检查是否设置了转发目标
         if not self.config.forward_target_qq:
-            await event.send(
-                event.plain_result("❌ 插件未配置转发目标QQ，请联系管理员配置")
-            )
+            await event.send(event.plain_result(Messages.get("title.error.no_target")))
             return
 
         # 记录频率限制
@@ -254,7 +264,7 @@ class TitleHandler:
         chain = [
             Comp.Reply(id=message_id),
             Comp.At(qq=user_id),
-            Comp.Plain("\n✅ 已申请移除头衔\n📢 已通知群主处理，请耐心等待"),
+            Comp.Plain(Messages.get("title.apply.remove_success")),
         ]
         await event.send(event.chain_result(chain))
 
@@ -288,15 +298,16 @@ class TitleHandler:
 
         # 构建转发消息
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        divider = Messages.get("common.divider")
 
-        forward_message = (
-            f"📋 头衔移除通知\n"
-            f"━━━━━━━━━━━━━━\n"
-            f"👤 申请人：{user_name}({user_id})\n"
-            f"👥 来源群：{group_name}({group_id})\n"
-            f"🏷️ 操作：移除头衔\n"
-            f"⏰ 申请时间：{current_time}\n"
-            f"━━━━━━━━━━━━━━"
+        forward_message = Messages.get(
+            "title.forward.remove_title",
+            divider=divider,
+            user_name=user_name,
+            user_id=user_id,
+            group_name=group_name,
+            group_id=group_id,
+            time=current_time,
         )
 
         try:

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.5.9] - 2025-03-19
+
+### Changed
+
+- refactor(messages): 实现消息字符串外部化系统
+- refactor(messages): 新增 `messages.json` 存储所有可配置文本
+- refactor(messages): 新增 `messages.py` 提供统一的消息获取接口
+- refactor(messages): 更新 main.py, command/*.py 使用消息系统
+- refactor(messages): 保留内部日志字符串，仅外部化用户可见文本
+
 ## [v1.5.8] - 2025-03-19
 
 ### Changed

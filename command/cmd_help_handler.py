@@ -7,58 +7,14 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
     AiocqhttpMessageEvent,
 )
 
+from ..messages import Messages
+
 
 class HelpHandler:
     """帮助菜单处理器
 
     显示插件的帮助信息和使用说明
     """
-
-    # 普通用户帮助菜单（精简版）
-    HELP_MENU_USER = """
-📋 指令列表
-━━━━━━━━━━━━━━
-• 菜单 / 帮助 / help
-  显示本帮助菜单
-
-🏷️ 头衔管理
-━━━━━━━━━━━━━━
-• 头衔 <名称>
-  别名：申请头衔、我要头衔、换头衔、更换头衔
-  示例：
-    头衔 小可爱（申请/更换）
-    头衔 无（移除头衔）
-
-⚠️ 限制：间隔 {min_interval} 分钟，每日 {daily_limit} 次
-"""
-
-    # 管理员帮助菜单（完整版）
-    HELP_MENU_ADMIN = """
-📋 指令列表
-━━━━━━━━━━━━━━
-• 菜单 / 帮助 / help
-  显示本帮助菜单
-
-🏷️ 头衔管理
-━━━━━━━━━━━━━━
-• 头衔 <名称>
-  别名：申请头衔、我要头衔、换头衔、更换头衔
-  示例：
-    头衔 小可爱（申请/更换）
-    头衔 无（移除头衔）
-
-⚠️ 限制：间隔 {min_interval} 分钟，每日 {daily_limit} 次
-
-⚙️ 管理说明
-━━━━━━━━━━━━━━
-配置管理请使用 AstrBot WebUI
-
-📍 群打卡功能
-━━━━━━━━━━━━━━
-机器人会在配置的时间段内
-随机打卡到指定QQ群
-（在WebUI中配置群列表、时间段和欲望）
-"""
 
     def __init__(self, min_interval: int = 5, daily_limit: int = 3):
         """初始化帮助处理器
@@ -79,11 +35,18 @@ class HelpHandler:
         Returns:
             格式化的帮助菜单
         """
-        menu = self.HELP_MENU_ADMIN if is_admin else self.HELP_MENU_USER
-        return menu.format(
-            min_interval=self.min_interval,
-            daily_limit=self.daily_limit,
-        )
+        if is_admin:
+            return Messages.get(
+                "help.menu_admin",
+                min_interval=self.min_interval,
+                daily_limit=self.daily_limit,
+            )
+        else:
+            return Messages.get(
+                "help.menu_user",
+                min_interval=self.min_interval,
+                daily_limit=self.daily_limit,
+            )
 
     async def show_menu(
         self, event: AiocqhttpMessageEvent, is_admin: bool = False

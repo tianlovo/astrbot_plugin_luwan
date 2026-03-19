@@ -11,13 +11,7 @@ import time
 from collections import defaultdict
 from datetime import datetime
 
-import astrbot.api.message_components as Comp
 from astrbot.api import logger
-from astrbot.api.event import MessageChain
-from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_platform_adapter import (
-    AiocqhttpAdapter,
-)
-from astrbot.core.star.filter.platform_adapter_type import PlatformAdapterType
 
 from ..infra import LuwanConfig, LuwanDB
 
@@ -193,21 +187,14 @@ class PokeService:
             是否戳成功
         """
         try:
-            platform = self.context.get_platform(PlatformAdapterType.AIOCQHTTP)
-            if not platform:
-                logger.warning("[PokeService] 无法获取 aiocqhttp 平台适配器")
+            if not self._bot_instance:
+                logger.warning("[PokeService] Bot实例未设置，无法执行戳一戳")
                 return False
 
-            if not isinstance(platform, AiocqhttpAdapter):
-                logger.warning(f"[PokeService] 平台适配器类型不匹配: {type(platform)}")
-                return False
-
-            platform_id = platform.metadata.id
-            chain = MessageChain()
-            chain.chain.append(Comp.Poke(poke_type="126", qq=int(user_id)))
-
-            umo = f"{platform_id}:GroupMessage:{group_id}"
-            await self.context.send_message(umo, chain)
+            await self._bot_instance.group_poke(
+                group_id=int(group_id),
+                user_id=int(user_id),
+            )
 
             current_time = int(datetime.now().timestamp())
             await self.db.update_last_poke_time(user_id, current_time)

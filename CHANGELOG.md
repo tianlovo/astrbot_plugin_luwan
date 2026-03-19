@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.7.3] - 2025-03-19
+
+### Added
+
+- feat(mute): 添加"禁言我"命令
+- feat(mute): 支持配置启用开关和群组列表
+
+### Refactored
+
+- refactor(mute): 将禁言我处理器移至command包
+- refactor(config): 将禁言我配置归入mute父级
+
 ## [v1.7.2] - 2025-03-19
 
 ### Fixed

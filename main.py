@@ -11,7 +11,7 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
 )
 from astrbot.core.star.filter.event_message_type import EventMessageType
 
-from .command import HelpHandler, TitleHandler
+from .command import HelpHandler, TestHandler, TitleHandler
 from .infra import LuwanConfig, LuwanDB, Messages
 from .service import GroupCheckinService, ImageForwarder
 
@@ -43,12 +43,14 @@ class LuwanPlugin(Star):
         self.title_handler: TitleHandler | None = None
         self.image_forwarder: ImageForwarder | None = None
         self.group_checkin: GroupCheckinService | None = None
+        self.test_handler: TestHandler | None = None
 
     async def initialize(self) -> None:
         """异步初始化插件"""
         try:
             await self.db.init()
             self.title_handler = TitleHandler(self.cfg, self.db)
+            self.test_handler = TestHandler(self.cfg)
 
             # 初始化 ComuPik 图片转发服务
             await self.db.init_comupik_tables()
@@ -325,31 +327,10 @@ class LuwanPlugin(Star):
     @filter.event_message_type(EventMessageType.GROUP_MESSAGE)
     async def handle_test(self, event: AiocqhttpMessageEvent) -> None:
         """测试命令（仅超级管理员可用）"""
-        user_id = event.get_sender_id()
-
-        if not self.cfg.is_admin(user_id):
-            await event.send(event.plain_result("❌ 仅超级管理员可使用此命令"))
-            return
-
-        message_str = event.message_str.strip()
-
-        if "分享" in message_str:
-            await self._test_share(event)
+        if self.test_handler:
+            await self.test_handler.handle_test(event)
         else:
-            await event.send(event.plain_result("可用子命令：分享"))
-
-    async def _test_share(self, event: AiocqhttpMessageEvent) -> None:
-        """测试分享功能"""
-        import astrbot.api.message_components as Comp
-
-        url = "https://www.bilibili.com/video/BV1FAcfzJE3Q"
-        title = "桑多涅 Jeb Nid Nid 【原神MMD】"
-        content = "测试分享内容"
-
-        chain = Comp.MessageChain().append(
-            Comp.Share(url=url, title=title, content=content, image=None)
-        )
-        await event.send(chain)
+            await event.send(event.plain_result("❌ 测试功能未初始化"))
 
     # ==================== Bot实例捕获 ====================
 

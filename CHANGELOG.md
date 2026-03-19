@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.5.7] - 2025-03-19
+
+### Added
+
+- feat(checkin): 添加"打卡"命令，支持在群聊中手动触发机器人打卡
+- feat(checkin): 添加"打卡 状态"命令，超级管理员可查看打卡配置和状态
+- feat(checkin): 支持查看当前群是否在打卡列表、今日是否已打卡、计划打卡时间
+- feat(checkin): 状态命令显示时区、打卡时段、打卡欲望、保底功能等配置信息
+
 ## [v1.5.6] - 2025-03-19
 
 ### Added

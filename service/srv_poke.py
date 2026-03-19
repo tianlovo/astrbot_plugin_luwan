@@ -277,6 +277,10 @@ class PokeService:
                 logger.debug("[PokeService] 忽略自己发送的戳一戳")
                 return
 
+            if user_id == self._bot_instance.self_id:
+                logger.debug("[PokeService] 反戳时发送者是机器人自己，跳过")
+                return
+
             if target_id == self_id:
                 if self.cfg.poke_antipoke_enabled:
                     await self._do_antipoke(user_id, group_id)
@@ -324,6 +328,10 @@ class PokeService:
             group_id: 群ID（如果有）
         """
         if not self.cfg.poke_follow_enabled:
+            return
+
+        if target_id == self._bot_instance.self_id:
+            logger.debug("[PokeService] 跟戳时目标是自己，跳过")
             return
 
         if random.random() > self.cfg.poke_follow_prob:

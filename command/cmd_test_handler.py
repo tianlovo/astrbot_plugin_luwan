@@ -154,11 +154,7 @@ class TestHandler:
                     f"🔍 群 {group_id} 消息分析\n━━━━━━━━━━━━━━\n{analysis_text}\n━━━━━━━━━━━━━━"
                 )
 
-                platform = self.context.get_platform("aiocqhttp")
-                if platform:
-                    platform_id = platform.metadata.id
-                    umo = f"{platform_id}:GroupMessage:{group_id}"
-                    await self.context.send_message(umo, chain)
+                await self.context.send_message(event.unified_msg_origin, chain)
                 logger.info(f"[LuwanPlugin] 已分析群 {group_id} 的消息")
         except Exception as e:
             logger.error(f"[LuwanPlugin] 分析消息失败: {e}")

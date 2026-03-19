@@ -156,11 +156,11 @@ class TestHandler:
 
             if analysis_parts:
                 analysis_text = "\n\n".join(analysis_parts)
-                chain = [
-                    Comp.Plain(
-                        f"🔍 群 {group_id} 消息分析\n━━━━━━━━━━━━━━\n{analysis_text}\n━━━━━━━━━━━━━━"
-                    )
-                ]
+                from astrbot.api.event import MessageChain
+
+                chain = MessageChain().plain(
+                    f"🔍 群 {group_id} 消息分析\n━━━━━━━━━━━━━━\n{analysis_text}\n━━━━━━━━━━━━━━"
+                )
 
                 await self.context.send_message(event.unified_msg_origin, chain)
                 logger.info(f"[LuwanPlugin] 已分析群 {group_id} 的消息")

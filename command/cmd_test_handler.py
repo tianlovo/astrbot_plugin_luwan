@@ -51,12 +51,42 @@ class TestHandler:
         Args:
             event: 消息事件对象
         """
-        url = "https://www.bilibili.com/video/BV1FAcfzJE3Q"
-        title = "桑多涅 Jeb Nid Nid 【原神MMD】"
-        content = "测试分享内容"
+        json_data = {
+            "appName": "bilibili",
+            "appView": "video",
+            "ver": "1.0.0",
+            "desc": "桑多涅 Jeb Nid Nid 【原神MMD】",
+            "prompt": "[Bilibili]",
+            "metaData": {
+                "detail_1": {
+                    "appid": "333",
+                    "appType": 13,
+                    "title": "桑多涅 Jeb Nid Nid 【原神MMD】",
+                    "desc": "桑多涅 Jeb Nid Nid 【原神MMD】",
+                    "icon": "",
+                    "preview": "",
+                    "url": "https://www.bilibili.com/video/BV1FAcfzJE3Q",
+                    "scene": 0,
+                    "host": {"uin": 0, "nick": ""},
+                    "shareTemplateId": "",
+                    "shareTemplateData": {},
+                    "showLittleTail": "",
+                    "gamePoints": "",
+                    "gamePointsUrl": "",
+                    "shareOrigin": 0,
+                }
+            },
+            "config": {
+                "type": "normal",
+                "width": 0,
+                "height": 0,
+                "forward": 1,
+                "autoSize": 0,
+                "ctime": 0,
+                "token": "",
+            },
+        }
 
-        chain = [
-            Comp.Share(url=url, title=title, content=content, image=None)
-        ]
-        await event.send(event.chain_result(chain))
-        logger.info("[LuwanPlugin] 测试分享消息已发送")
+        chain = Comp.MessageChain().append(Comp.Json(data=json_data))
+        await event.send(chain)
+        logger.info("[LuwanPlugin] Bilibili小程序卡片已发送")

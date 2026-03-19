@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.6.4] - 2025-03-19
+
+### Changed
+
+- refactor(test): 使用 Comp.Json 发送 app_mini_program 格式的 Bilibili 小程序卡片
+
 ## [v1.6.3] - 2025-03-19
 
 ### Fixed

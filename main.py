@@ -352,6 +352,14 @@ class LuwanPlugin(Star):
                     self.group_checkin.set_bot_instance(event.bot)
 
             if (
+                self.poke_service
+                and event.get_platform_name() == "aiocqhttp"
+                and isinstance(event, AiocqhttpMessageEvent)
+            ):
+                if event.bot and not self.poke_service._bot_instance:
+                    self.poke_service.set_bot_instance(event.bot)
+
+            if (
                 self.test_handler
                 and event.get_platform_name() == "aiocqhttp"
                 and isinstance(event, AiocqhttpMessageEvent)

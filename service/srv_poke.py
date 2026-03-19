@@ -38,8 +38,18 @@ class PokeService:
         self.cfg = config
         self.db = database
         self.context = context
+        self._bot_instance = None
         self._group_message_counts: dict[str, list[float]] = defaultdict(list)
         self._lock = asyncio.Lock()
+
+    def set_bot_instance(self, bot_instance) -> None:
+        """设置Bot实例
+
+        Args:
+            bot_instance: aiocqhttp Bot实例
+        """
+        self._bot_instance = bot_instance
+        logger.info("[PokeService] Bot实例已设置")
 
     def is_group_enabled(self, group_id: str) -> bool:
         """检查群是否启用戳一戳功能
@@ -177,17 +187,11 @@ class PokeService:
             是否戳成功
         """
         try:
-            platform = self.context.get_platform("aiocqhttp")
-            if not platform:
-                logger.warning("[PokeService] 无法获取 aiocqhttp 平台")
+            if not self._bot_instance:
+                logger.warning("[PokeService] Bot实例未设置，无法执行戳一戳")
                 return False
 
-            bot = getattr(platform, "_bot", None)
-            if not bot:
-                logger.warning("[PokeService] 无法获取 bot 实例")
-                return False
-
-            await bot.call_action(
+            await self._bot_instance.api.call_action(
                 "send_poke",
                 user_id=int(user_id),
             )

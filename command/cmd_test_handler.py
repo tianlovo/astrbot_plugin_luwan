@@ -124,7 +124,7 @@ class TestHandler:
             return
 
         try:
-            message_chain = event.message_chain
+            message_chain = event.get_messages()
             analysis_parts = []
 
             for segment in message_chain:

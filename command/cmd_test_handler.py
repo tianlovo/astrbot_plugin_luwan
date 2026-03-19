@@ -156,9 +156,9 @@ class TestHandler:
 
             if analysis_parts:
                 analysis_text = "\n\n".join(analysis_parts)
-                from astrbot.api.event import MessageChain
+                from astrbot.core.message.message_event_result import MessageChain
 
-                chain = MessageChain().plain(
+                chain = MessageChain().message(
                     f"🔍 群 {group_id} 消息分析\n━━━━━━━━━━━━━━\n{analysis_text}\n━━━━━━━━━━━━━━"
                 )
 

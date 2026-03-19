@@ -184,13 +184,13 @@ class PokeService:
 
     async def do_poke(
         self,
-        group_id: str,
+        group_id: str | None,
         user_id: str,
     ) -> bool:
         """执行戳一戳
 
         Args:
-            group_id: 群号
+            group_id: 群号，None 表示私聊
             user_id: 用户ID
 
         Returns:
@@ -205,10 +205,13 @@ class PokeService:
                 logger.debug("[PokeService] 不能戳机器人自己")
                 return False
 
-            await self._bot_instance.group_poke(
-                group_id=int(group_id),
-                user_id=int(user_id),
-            )
+            if group_id:
+                await self._bot_instance.group_poke(
+                    group_id=int(group_id),
+                    user_id=int(user_id),
+                )
+            else:
+                await self._bot_instance.friend_poke(user_id=int(user_id))
 
             current_time = int(datetime.now().timestamp())
             await self.db.update_last_poke_time(user_id, current_time)
@@ -307,17 +310,11 @@ class PokeService:
 
         max_times = self.cfg.poke_antipoke_max_times
         for _ in range(max_times):
-            try:
-                if group_id:
-                    await self._bot_instance.group_poke(
-                        group_id=int(group_id),
-                        user_id=int(user_id),
-                    )
-                else:
-                    await self._bot_instance.friend_poke(user_id=int(user_id))
-                logger.info(f"[PokeService] 反戳用户 {user_id} 在群 {group_id}")
-            except Exception as e:
-                logger.error(f"[PokeService] 反戳失败: {e}")
+            success = await self.do_poke(
+                str(group_id) if group_id else None,
+                str(user_id),
+            )
+            if not success:
                 break
 
     async def _do_follow_poke(self, target_id: int, group_id: int | None) -> None:
@@ -338,14 +335,7 @@ class PokeService:
             logger.debug("[PokeService] 跟戳概率未命中，跳过")
             return
 
-        try:
-            if group_id:
-                await self._bot_instance.group_poke(
-                    group_id=int(group_id),
-                    user_id=int(target_id),
-                )
-            else:
-                await self._bot_instance.friend_poke(user_id=int(target_id))
-            logger.info(f"[PokeService] 跟戳用户 {target_id} 在群 {group_id}")
-        except Exception as e:
-            logger.error(f"[PokeService] 跟戳失败: {e}")
+        await self.do_poke(
+            str(group_id) if group_id else None,
+            str(target_id),
+        )

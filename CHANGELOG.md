@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.5.5] - 2025-03-19
+
+### Changed
+
+- feat(group_checkin): 每小时输出日志显示每个群的下一次打卡时间
+- feat(group_checkin): 添加 `_log_next_checkin_times` 方法输出打卡计划
+- feat(group_checkin): 日志显示群打卡状态（已完成/已失败/计划时间）
+- feat(group_checkin): 日志显示保底检查时间
+
 ## [v1.5.4] - 2025-03-19
 
 ### Changed

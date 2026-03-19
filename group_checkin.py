@@ -6,7 +6,7 @@
 
 import asyncio
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from astrbot.api import logger
 from astrbot.api.event import MessageChain
@@ -198,13 +198,71 @@ class GroupCheckinService:
 
         logger.info("[GroupCheckin] 开始检查循环，每分钟检查一次")
 
+        # 记录上次输出日志的时间（每小时输出一次）
+        last_log_time = ""
+
         while self._running:
             try:
+                now = datetime.now()
+                current_hour = now.strftime("%H:00")
+
+                # 每小时输出一次各群的下次打卡时间
+                if current_hour != last_log_time:
+                    await self._log_next_checkin_times()
+                    last_log_time = current_hour
+
                 await self._process_checkin()
             except Exception as e:
                 logger.error(f"[GroupCheckin] 检查打卡出错: {e}")
 
             await asyncio.sleep(interval_seconds)
+
+    async def _log_next_checkin_times(self) -> None:
+        """输出每个群的下一次打卡时间"""
+        if not self._scheduled_times:
+            return
+
+        now = datetime.now()
+        current_time = now.strftime("%H:%M")
+
+        logger.info("[GroupCheckin] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        logger.info(f"[GroupCheckin] 各群下次打卡时间 (当前时间: {current_time}):")
+
+        for group_id in self.cfg.group_checkin_target_groups:
+            if not group_id:
+                continue
+
+            # 检查今天是否已经打卡成功
+            already_checkin = await self.db.is_group_checked_in_today(group_id)
+            if already_checkin:
+                status = "今日已完成"
+                next_time = "--:--"
+            elif self._checkin_failed.get(group_id, False):
+                status = "已失败3次"
+                next_time = "--:--"
+            else:
+                scheduled_time = self._scheduled_times.get(group_id, "未安排")
+                attempts = self._checkin_attempts.get(group_id, 0)
+
+                # 计算下一次尝试时间
+                if attempts > 0:
+                    # 已经尝试过，下次是立即重试（下一分钟）
+                    next_minute = now + timedelta(minutes=1)
+                    next_time = next_minute.strftime("%H:%M")
+                    status = f"计划{scheduled_time} (已尝试{attempts}次，下次{next_time}重试)"
+                else:
+                    # 还未尝试，按计划时间
+                    next_time = scheduled_time
+                    status = f"计划{scheduled_time}"
+
+            logger.info(f"[GroupCheckin]   群 {group_id}: {status}")
+
+        # 保底检查时间
+        if self.cfg.group_checkin_enable_guarantee:
+            guarantee_time = self.cfg.group_checkin_guarantee_check_time
+            logger.info(f"[GroupCheckin]   保底检查时间: {guarantee_time}")
+
+        logger.info("[GroupCheckin] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
     async def _process_checkin(self) -> None:
         """处理打卡逻辑"""

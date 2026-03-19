@@ -8,13 +8,10 @@ import time
 from pathlib import Path
 
 from astrbot.api import logger
-from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
-    AiocqhttpMessageEvent,
-)
 
-from .comupik_client import ComuPikClient, ImageInfo
-from .config import LuwanConfig
-from .database import LuwanDB
+from ..config import LuwanConfig
+from ..database import LuwanDB
+from .srv_comupik_client import ComuPikClient, ImageInfo
 
 
 class ImageForwarder:

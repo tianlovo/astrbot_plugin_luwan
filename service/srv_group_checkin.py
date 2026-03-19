@@ -11,8 +11,8 @@ from datetime import datetime, timedelta
 from astrbot.api import logger
 from astrbot.api.event import MessageChain
 
-from .config import LuwanConfig
-from .database import LuwanDB
+from ..config import LuwanConfig
+from ..database import LuwanDB
 
 # 时区偏移映射表（相对于 UTC 的小时偏移）
 TIMEZONE_OFFSETS = {

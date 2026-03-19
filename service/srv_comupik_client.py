@@ -3,11 +3,12 @@
 提供 ComuPik 图片服务的 Python 客户端接口。
 """
 
+import asyncio
 import json
 import time
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import AsyncIterator, Optional
 
 import aiohttp
 
@@ -95,7 +96,7 @@ class ComuPikClient:
             base_url: API 基础 URL
         """
         self.base_url = base_url.rstrip("/")
-        self._session: Optional[aiohttp.ClientSession] = None
+        self._session: aiohttp.ClientSession | None = None
         self._known_ids: set[int] = set()
         self._last_end_time: int = int(time.time())
 
@@ -183,7 +184,7 @@ class ComuPikClient:
         self,
         start_time: int,
         end_time: int,
-        exclude_ids: Optional[list[int]] = None,
+        exclude_ids: list[int] | None = None,
         limit: int = 100,
         offset: int = 0,
     ) -> tuple[list[ImageInfo], int]:
@@ -274,8 +275,8 @@ class ComuPikClient:
     async def download_image(
         self,
         filename: str,
-        save_path: Optional[Path] = None,
-    ) -> Optional[bytes]:
+        save_path: Path | None = None,
+    ) -> bytes | None:
         """下载图片文件
 
         Args:
@@ -313,7 +314,7 @@ class ComuPikClient:
         self,
         interval: int = 30,
         time_range_hours: int = 12,
-        start_from: Optional[int] = None,
+        start_from: int | None = None,
     ) -> AsyncIterator[ImageInfo]:
         """轮询新图片
 

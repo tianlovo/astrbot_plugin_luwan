@@ -6,15 +6,14 @@
 import re
 from datetime import datetime
 
+import astrbot.api.message_components as Comp
 from astrbot.api import logger
-from astrbot.core.message.components import At, Plain, Reply
 from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
     AiocqhttpMessageEvent,
 )
 
-from .config import LuwanConfig
-from .database import LuwanDB
-import astrbot.api.message_components as Comp
+from ..config import LuwanConfig
+from ..database import LuwanDB
 
 
 class TitleHandler:
@@ -331,7 +330,7 @@ class TitleHandler:
         if match:
             title = match.group(1).strip()
             # 移除可能的前缀符号
-            title = title.lstrip("/!！").strip()
+            title = title.lstrip("/!!").strip()
             if title:
                 return title
 

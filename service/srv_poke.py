@@ -133,6 +133,10 @@ class PokeService:
             logger.debug(f"[PokeService] 群 {group_id} 未启用戳一戳")
             return False
 
+        if self._bot_instance and user_id == str(self._bot_instance.self_id):
+            logger.debug("[PokeService] 跳过机器人自己的消息")
+            return False
+
         is_admin = self.cfg.is_admin(user_id)
 
         last_poke_time = await self.db.get_last_poke_time(user_id)
@@ -197,6 +201,10 @@ class PokeService:
                 logger.warning("[PokeService] Bot实例未设置，无法执行戳一戳")
                 return False
 
+            if user_id == str(self._bot_instance.self_id):
+                logger.debug("[PokeService] 不能戳机器人自己")
+                return False
+
             await self._bot_instance.group_poke(
                 group_id=int(group_id),
                 user_id=int(user_id),
@@ -225,6 +233,9 @@ class PokeService:
             message_text: 消息文本
         """
         if not self.is_group_enabled(group_id):
+            return
+
+        if self._bot_instance and user_id == str(self._bot_instance.self_id):
             return
 
         async with self._lock:

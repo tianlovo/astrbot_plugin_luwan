@@ -13,6 +13,7 @@ from astrbot.core.star.filter.event_message_type import EventMessageType
 
 from .config import LuwanConfig
 from .database import LuwanDB
+from .group_checkin import GroupCheckinService
 from .help_handler import HelpHandler
 from .image_forwarder import ImageForwarder
 from .title_handler import TitleHandler
@@ -22,7 +23,7 @@ from .title_handler import TitleHandler
     "astrbot_plugin_luwan",
     "Luwan",
     "AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能",
-    "1.4.0",
+    "1.5.0",
 )
 class LuwanPlugin(Star):
     """鹿丸插件主类
@@ -44,6 +45,7 @@ class LuwanPlugin(Star):
         self.help_handler = HelpHandler(self.cfg.min_interval, self.cfg.daily_limit)
         self.title_handler: TitleHandler | None = None
         self.image_forwarder: ImageForwarder | None = None
+        self.group_checkin: GroupCheckinService | None = None
 
     async def initialize(self) -> None:
         """异步初始化插件"""
@@ -56,6 +58,12 @@ class LuwanPlugin(Star):
             self.image_forwarder = ImageForwarder(self.cfg, self.db, self.context)
             if await self.image_forwarder.initialize():
                 await self.image_forwarder.start()
+
+            # 初始化群打卡服务
+            await self.db.init_group_checkin_tables()
+            self.group_checkin = GroupCheckinService(self.cfg, self.db, self.context)
+            if await self.group_checkin.initialize():
+                await self.group_checkin.start()
 
             logger.info("[LuwanPlugin] 插件初始化完成")
         except Exception as e:
@@ -133,12 +141,35 @@ class LuwanPlugin(Star):
             logger.error(f"[LuwanPlugin] 处理头衔管理失败: {e}")
             await event.send(event.plain_result("❌ 操作失败，请稍后重试"))
 
+    # ==================== Bot实例捕获 ====================
+
+    @filter.event_message_type(EventMessageType.ALL)
+    async def _capture_bot_instance(self, event: AiocqhttpMessageEvent) -> None:
+        """捕获Bot实例用于群打卡
+
+        监听所有消息事件，捕获aiocqhttp平台的bot实例
+        """
+        try:
+            if (
+                self.group_checkin
+                and event.get_platform_name() == "aiocqhttp"
+                and isinstance(event, AiocqhttpMessageEvent)
+            ):
+                if event.bot and not self.group_checkin._bot_instance:
+                    self.group_checkin.set_bot_instance(event.bot)
+        except Exception as e:
+            logger.debug(f"[LuwanPlugin] 捕获Bot实例失败: {e}")
+
     async def terminate(self) -> None:
         """插件卸载时清理资源"""
         try:
             # 停止图片转发服务
             if self.image_forwarder:
                 await self.image_forwarder.stop()
+
+            # 停止群打卡服务
+            if self.group_checkin:
+                await self.group_checkin.stop()
 
             await self.db.close()
             logger.info("[LuwanPlugin] 插件已卸载，资源已清理")

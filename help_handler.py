@@ -52,6 +52,12 @@ class HelpHandler:
 ⚙️ 管理说明
 ━━━━━━━━━━━━━━
 配置管理请使用 AstrBot WebUI
+
+📍 群打卡功能
+━━━━━━━━━━━━━━
+机器人会在配置的时间段内
+随机打卡到指定QQ群
+（在WebUI中配置群列表、时间段和欲望）
 """
 
     def __init__(self, min_interval: int = 5, daily_limit: int = 3):

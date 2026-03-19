@@ -133,6 +133,53 @@ class LuwanConfig:
         comupik = self.get("comupik", {})
         return comupik.get("poll_time_range", 12)
 
+    # ==================== 群打卡配置 ====================
+
+    @property
+    def group_checkin_enabled(self) -> bool:
+        """是否启用群打卡功能"""
+        group_checkin = self.get("group_checkin", {})
+        return group_checkin.get("enabled", False)
+
+    @property
+    def group_checkin_groups(self) -> list[dict]:
+        """群打卡列表配置
+
+        Returns:
+            群配置列表，每个配置包含:
+            - group_id: 群号
+            - start_time: 开始时间 (HH:MM)
+            - end_time: 结束时间 (HH:MM)
+            - desire: 打卡欲望 (0-100)
+            - messages: 打卡消息列表
+        """
+        group_checkin = self.get("group_checkin", {})
+        return group_checkin.get("groups", [])
+
+    @property
+    def group_checkin_interval(self) -> int:
+        """群打卡检查间隔（分钟）"""
+        group_checkin = self.get("group_checkin", {})
+        return group_checkin.get("check_interval", 10)
+
+    @property
+    def group_checkin_enable_guarantee(self) -> bool:
+        """是否启用打卡保底功能"""
+        group_checkin = self.get("group_checkin", {})
+        return group_checkin.get("enable_guarantee", False)
+
+    @property
+    def group_checkin_guarantee_check_time(self) -> str:
+        """打卡保底检查时间（HH:MM）"""
+        group_checkin = self.get("group_checkin", {})
+        return group_checkin.get("guarantee_check_time", "22:00")
+
+    @property
+    def group_checkin_guarantee_start_time(self) -> str:
+        """打卡保底统计开始时间（HH:MM）"""
+        group_checkin = self.get("group_checkin", {})
+        return group_checkin.get("guarantee_start_time", "00:00")
+
     def is_admin(self, user_id: str) -> bool:
         """检查用户是否为管理员
 

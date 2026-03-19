@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.5.0] - 2025-03-19
+
+### Added
+
+- feat(group_checkin): 新增群打卡功能
+- feat(group_checkin): 支持配置多个QQ群自动打卡
+- feat(group_checkin): 每个群可独立配置打卡时间段（HH:MM格式）
+- feat(group_checkin): 每个群可独立配置打卡欲望（0-100%概率）
+- feat(group_checkin): 支持配置多条打卡消息随机选择
+- feat(group_checkin): 每日自动重置，避免重复打卡
+- feat(config): 添加群打卡配置项到 WebUI
+- feat(database): 添加群打卡记录表
+
+### Configuration
+
+群打卡配置项：
+- `group_checkin.enabled`: 是否启用群打卡
+- `group_checkin.groups`: 打卡群列表（群号、时间段、欲望、消息）
+- `group_checkin.check_interval`: 检查间隔（分钟）
+
 ## [v1.4.0] - 2025-03-19
 
 ### Removed

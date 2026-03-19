@@ -467,6 +467,181 @@ class LuwanDB:
             logger.error(f"[LuwanDB] 清理旧转发记录失败: {e}")
             return 0
 
+    # ==================== 群打卡记录 ====================
+
+    async def init_group_checkin_tables(self) -> None:
+        """初始化群打卡相关数据库表"""
+        if not self._conn:
+            raise RuntimeError("数据库未初始化")
+
+        try:
+            # 创建群打卡记录表
+            await self._conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS group_checkin_records (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    group_id TEXT NOT NULL,
+                    checkin_date TEXT NOT NULL,
+                    checkin_time INTEGER NOT NULL,
+                    checkin_type TEXT DEFAULT 'normal',
+                    UNIQUE(group_id, checkin_date)
+                )
+                """
+            )
+
+            # 创建索引
+            await self._conn.execute(
+                """
+                CREATE INDEX IF NOT EXISTS idx_group_checkin_date
+                ON group_checkin_records(group_id, checkin_date)
+                """
+            )
+
+            await self._conn.commit()
+            logger.info("[LuwanDB] 群打卡相关表初始化完成")
+        except Exception as e:
+            logger.error(f"[LuwanDB] 群打卡表初始化失败: {e}")
+            raise
+
+    async def is_group_checked_in_today(
+        self, group_id: str, start_time: str = None
+    ) -> bool:
+        """检查群今天是否已经打卡
+
+        Args:
+            group_id: QQ群号
+            start_time: 可选，统计开始时间 HH:MM，如 "00:00"
+
+        Returns:
+            今天是否已经打卡
+        """
+        if not self._conn:
+            raise RuntimeError("数据库未初始化")
+
+        try:
+            today = datetime.now().strftime("%Y-%m-%d")
+
+            if start_time:
+                # 如果有指定开始时间，检查从该时间开始的打卡记录
+                start_h, start_m = map(int, start_time.split(":"))
+                start_timestamp = int(
+                    datetime.now()
+                    .replace(hour=start_h, minute=start_m, second=0, microsecond=0)
+                    .timestamp()
+                )
+
+                async with self._conn.execute(
+                    """
+                    SELECT 1 FROM group_checkin_records
+                    WHERE group_id = ? AND checkin_date = ? AND checkin_time >= ?
+                    """,
+                    (group_id, today, start_timestamp),
+                ) as cursor:
+                    row = await cursor.fetchone()
+                    return row is not None
+            else:
+                # 默认检查今天是否有打卡记录
+                async with self._conn.execute(
+                    "SELECT 1 FROM group_checkin_records WHERE group_id = ? AND checkin_date = ?",
+                    (group_id, today),
+                ) as cursor:
+                    row = await cursor.fetchone()
+                    return row is not None
+        except Exception as e:
+            logger.error(f"[LuwanDB] 检查群打卡状态失败: {e}")
+            return False
+
+    async def record_group_checkin(
+        self, group_id: str, checkin_type: str = "normal"
+    ) -> bool:
+        """记录群打卡
+
+        Args:
+            group_id: QQ群号
+            checkin_type: 打卡类型，"normal" 或 "guarantee"
+
+        Returns:
+            是否记录成功
+        """
+        if not self._conn:
+            raise RuntimeError("数据库未初始化")
+
+        try:
+            now = datetime.now()
+            today = now.strftime("%Y-%m-%d")
+            timestamp = int(now.timestamp())
+
+            await self._conn.execute(
+                """
+                INSERT OR REPLACE INTO group_checkin_records
+                (group_id, checkin_date, checkin_time, checkin_type)
+                VALUES (?, ?, ?, ?)
+                """,
+                (group_id, today, timestamp, checkin_type),
+            )
+            await self._conn.commit()
+            return True
+        except Exception as e:
+            logger.error(f"[LuwanDB] 记录群打卡失败: {e}")
+            return False
+
+    async def get_group_checkin_history(
+        self, group_id: str, days: int = 7
+    ) -> list[dict]:
+        """获取群打卡历史
+
+        Args:
+            group_id: QQ群号
+            days: 查询最近多少天
+
+        Returns:
+            打卡记录列表
+        """
+        if not self._conn:
+            raise RuntimeError("数据库未初始化")
+
+        try:
+            cutoff_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+            async with self._conn.execute(
+                """
+                SELECT * FROM group_checkin_records
+                WHERE group_id = ? AND checkin_date >= ?
+                ORDER BY checkin_date DESC
+                """,
+                (group_id, cutoff_date),
+            ) as cursor:
+                rows = await cursor.fetchall()
+                return [dict(row) for row in rows]
+        except Exception as e:
+            logger.error(f"[LuwanDB] 获取群打卡历史失败: {e}")
+            return []
+
+    async def cleanup_old_checkin_records(self, days: int = 30) -> int:
+        """清理旧的打卡记录
+
+        Args:
+            days: 保留多少天内的记录
+
+        Returns:
+            清理的记录数
+        """
+        if not self._conn:
+            raise RuntimeError("数据库未初始化")
+
+        try:
+            cutoff_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+            async with self._conn.execute(
+                "DELETE FROM group_checkin_records WHERE checkin_date < ?",
+                (cutoff_date,),
+            ) as cursor:
+                deleted = cursor.rowcount
+            await self._conn.commit()
+            logger.info(f"[LuwanDB] 清理了 {deleted} 条旧的打卡记录")
+            return deleted
+        except Exception as e:
+            logger.error(f"[LuwanDB] 清理旧打卡记录失败: {e}")
+            return 0
+
     async def close(self) -> None:
         """关闭数据库连接"""
         if self._conn:

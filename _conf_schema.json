@@ -97,5 +97,86 @@
         "default": 12
       }
     }
+  },
+  "group_checkin": {
+    "description": "群打卡配置",
+    "hint": "配置机器人自动打卡的QQ群列表，每个群可独立设置时间段和打卡欲望",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用群打卡",
+        "hint": "是否启用群打卡功能",
+        "type": "bool",
+        "default": false
+      },
+      "groups": {
+        "description": "打卡群列表",
+        "hint": "配置要打卡的QQ群，每个群可设置时间段和概率",
+        "type": "list",
+        "default": [],
+        "items": {
+          "type": "object",
+          "properties": {
+            "group_id": {
+              "description": "QQ群号",
+              "hint": "要打卡的QQ群号",
+              "type": "string"
+            },
+            "start_time": {
+              "description": "开始时间",
+              "hint": "打卡时间段开始时间，格式 HH:MM",
+              "type": "string",
+              "default": "09:00"
+            },
+            "end_time": {
+              "description": "结束时间",
+              "hint": "打卡时间段结束时间，格式 HH:MM",
+              "type": "string",
+              "default": "23:00"
+            },
+            "desire": {
+              "description": "打卡欲望",
+              "hint": "打卡概率，0-100%",
+              "type": "int",
+              "slider": {
+                "min": 0,
+                "max": 100,
+                "step": 1
+              },
+              "default": 50
+            }
+          }
+        }
+      },
+      "check_interval": {
+        "description": "检查间隔（分钟）",
+        "hint": "多久检查一次是否需要打卡",
+        "type": "int",
+        "slider": {
+          "min": 1,
+          "max": 60,
+          "step": 1
+        },
+        "default": 10
+      },
+      "enable_guarantee": {
+        "description": "启用打卡保底",
+        "hint": "开启后，当晚上特定时间群内无人打卡时，机器人自动保底打卡",
+        "type": "bool",
+        "default": false
+      },
+      "guarantee_check_time": {
+        "description": "保底检查时间",
+        "hint": "每天检查群内是否有人打卡的时间，格式 HH:MM",
+        "type": "string",
+        "default": "22:00"
+      },
+      "guarantee_start_time": {
+        "description": "保底统计开始时间",
+        "hint": "从什么时间开始统计群内打卡情况，格式 HH:MM，建议 00:00",
+        "type": "string",
+        "default": "00:00"
+      }
+    }
   }
 }

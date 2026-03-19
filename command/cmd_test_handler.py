@@ -49,7 +49,7 @@ class TestHandler:
         elif "分析" in message_str:
             await self._test_analyze(event)
         else:
-            await event.send(event.plain_result("可用子命令：分享、分析"))
+            await event.send(event.plain_result("可用子命令：分享、分析（在当前群发送可开启/关闭该群的分析）"))
 
     async def _test_share(self, event: AiocqhttpMessageEvent) -> None:
         """测试分享功能
@@ -82,34 +82,18 @@ class TestHandler:
         Args:
             event: 消息事件对象
         """
-        message_str = event.message_str.strip()
-        match = re.search(r"分析\s*(\d+)", message_str)
-
-        if not match:
-            status = (
-                "、".join(sorted(self._analyze_groups))
-                if self._analyze_groups
-                else "无"
-            )
-            await event.send(
-                event.plain_result(
-                    f"📊 分析功能状态\n━━━━━━━━━━━━━━\n"
-                    f"监控群: {status}\n"
-                    f"━━━━━━━━━━━━━━\n"
-                    f"使用: 分析 <群号> 切换开关"
-                )
-            )
+        group_id = event.get_group_id()
+        if not group_id:
+            await event.send(event.plain_result("❌ 无法获取群号"))
             return
-
-        group_id = match.group(1)
 
         if group_id in self._analyze_groups:
             self._analyze_groups.discard(group_id)
-            await event.send(event.plain_result(f"✅ 已关闭群 {group_id} 的分析功能"))
+            await event.send(event.plain_result(f"✅ 已关闭当前群的分析功能"))
             logger.info(f"[LuwanPlugin] 已关闭群 {group_id} 的分析功能")
         else:
             self._analyze_groups.add(group_id)
-            await event.send(event.plain_result(f"✅ 已开启群 {group_id} 的分析功能"))
+            await event.send(event.plain_result(f"✅ 已开启当前群的分析功能"))
             logger.info(f"[LuwanPlugin] 已开启群 {group_id} 的分析功能")
 
     async def should_analyze(self, group_id: str) -> bool:

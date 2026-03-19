@@ -1,175 +1,155 @@
 {
-  "forward_target_qq": {
-    "description": "头衔申请转发目标QQ",
-    "hint": "接收头衔申请通知的群主QQ号，不填则无法转发申请",
-    "type": "string",
-    "default": "",
-    "obvious_hint": true
-  },
-  "command_prefix": {
-    "description": "指令前缀",
-    "hint": "触发插件指令的前缀字符，如 / 或 !，留空表示不需要前缀",
-    "type": "string",
-    "default": ""
-  },
-  "rate_limit": {
-    "description": "频率限制配置",
-    "hint": "防止用户频繁申请头衔的防骚扰机制",
-    "type": "object",
-    "items": {
-      "min_interval": {
-        "description": "最小申请间隔（分钟）",
-        "type": "int",
-        "slider": {
-          "min": 1,
-          "max": 60,
-          "step": 1
-        },
-        "default": 5
-      },
-      "daily_limit": {
-        "description": "每日申请次数上限",
-        "type": "int",
-        "slider": {
-          "min": 1,
-          "max": 20,
-          "step": 1
-        },
-        "default": 3
-      }
-    }
-  },
-  "super_admin": {
-    "description": "超级管理员QQ号",
-    "hint": "拥有插件管理权限的QQ号，通常与 AstrBot 管理员一致，不填则只允许 AstrBot 管理员操作",
-    "type": "string",
-    "default": ""
-  },
-  "auto_approve": {
-    "description": "自动批准头衔申请",
-    "hint": "开启后，头衔申请将自动批准而不需要群主确认",
-    "type": "bool",
-    "default": false
-  },
-  "comupik": {
-    "description": "ComuPik 图片转发配置",
-    "hint": "配置 ComuPik 图片收集插件的接入参数，用于将 Telegram 图片转发到 QQ 群",
-    "type": "object",
-    "items": {
-      "enabled": {
-        "description": "启用图片转发",
-        "hint": "是否启用 ComuPik 图片转发功能",
-        "type": "bool",
-        "default": true
-      },
-      "api_url": {
-        "description": "ComuPik API 地址",
-        "hint": "ComuPik 插件的 API 服务地址，默认 http://127.0.0.1:8080",
+    "forward_target_qq": {
+        "description": "头衔申请转发目标QQ",
+        "hint": "接收头衔申请通知的群主QQ号，不填则无法转发申请",
         "type": "string",
-        "default": "http://127.0.0.1:8080"
-      },
-      "target_groups": {
-        "description": "目标 QQ 群列表",
-        "hint": "接收转发图片的 QQ 群号列表，多个群号用逗号分隔",
-        "type": "list",
-        "default": []
-      },
-      "poll_interval": {
-        "description": "轮询间隔（秒）",
-        "hint": "检查新图片的时间间隔，建议 30-60 秒",
-        "type": "int",
-        "slider": {
-          "min": 10,
-          "max": 300,
-          "step": 10
-        },
-        "default": 30
-      },
-      "poll_time_range": {
-        "description": "轮询时间范围（小时）",
-        "hint": "每次轮询获取多少小时内的图片，默认 12 小时",
-        "type": "int",
-        "slider": {
-          "min": 1,
-          "max": 48,
-          "step": 1
-        },
-        "default": 12
-      }
-    }
-  },
-  "group_checkin": {
-    "description": "群打卡配置",
-    "hint": "配置机器人自动打卡的QQ群列表，每个群可独立设置时间段和打卡欲望",
-    "type": "object",
-    "items": {
-      "enabled": {
-        "description": "启用群打卡",
-        "hint": "是否启用群打卡功能",
-        "type": "bool",
-        "default": false
-      },
-      "target_groups": {
-        "description": "打卡群列表",
-        "hint": "配置要打卡的QQ群号列表",
-        "type": "list",
-        "default": [],
+        "default": "",
+        "obvious_hint": true
+    },
+    "command_prefix": {
+        "description": "指令前缀",
+        "hint": "触发插件指令的前缀字符，如 / 或 !，留空表示不需要前缀",
+        "type": "string",
+        "default": ""
+    },
+    "rate_limit": {
+        "description": "频率限制配置",
+        "hint": "防止用户频繁申请头衔的防骚扰机制",
+        "type": "object",
         "items": {
-          "type": "string"
+            "min_interval": {
+                "description": "最小申请间隔（分钟）",
+                "type": "int",
+                "slider": {"min": 1, "max": 60, "step": 1},
+                "default": 5
+            },
+            "daily_limit": {
+                "description": "每日申请次数上限",
+                "type": "int",
+                "slider": {"min": 1, "max": 20, "step": 1},
+                "default": 3
+            }
         }
-      },
-      "start_time": {
-        "description": "开始时间",
-        "hint": "打卡时间段开始时间，格式 HH:MM",
+    },
+    "super_admin": {
+        "description": "超级管理员QQ号",
+        "hint": "拥有插件管理权限的QQ号，通常与 AstrBot 管理员一致，不填则只允许 AstrBot 管理员操作",
         "type": "string",
-        "default": "09:00"
-      },
-      "end_time": {
-        "description": "结束时间",
-        "hint": "打卡时间段结束时间，格式 HH:MM",
-        "type": "string",
-        "default": "23:00"
-      },
-      "desire": {
-        "description": "打卡欲望",
-        "hint": "打卡概率，0-100%",
-        "type": "int",
-        "slider": {
-          "min": 0,
-          "max": 100,
-          "step": 1
-        },
-        "default": 50
-      },
-      "check_interval": {
-        "description": "检查间隔（分钟）",
-        "hint": "多久检查一次是否需要打卡",
-        "type": "int",
-        "slider": {
-          "min": 1,
-          "max": 60,
-          "step": 1
-        },
-        "default": 10
-      },
-      "enable_guarantee": {
-        "description": "启用打卡保底",
-        "hint": "开启后，当晚上特定时间群内无人打卡时，机器人自动保底打卡",
+        "default": ""
+    },
+    "auto_approve": {
+        "description": "自动批准头衔申请",
+        "hint": "开启后，头衔申请将自动批准而不需要群主确认",
         "type": "bool",
         "default": false
-      },
-      "guarantee_check_time": {
-        "description": "保底检查时间",
-        "hint": "每天检查群内是否有人打卡的时间，格式 HH:MM",
-        "type": "string",
-        "default": "22:00"
-      },
-      "guarantee_start_time": {
-        "description": "保底统计开始时间",
-        "hint": "从什么时间开始统计群内打卡情况，格式 HH:MM，建议 00:00",
-        "type": "string",
-        "default": "00:00"
-      }
+    },
+    "comupik": {
+        "description": "ComuPik 图片转发配置",
+        "hint": "配置 ComuPik 图片收集插件的接入参数，用于将 Telegram 图片转发到 QQ 群",
+        "type": "object",
+        "items": {
+            "enabled": {
+                "description": "启用图片转发",
+                "hint": "是否启用 ComuPik 图片转发功能",
+                "type": "bool",
+                "default": true
+            },
+            "api_url": {
+                "description": "ComuPik API 地址",
+                "hint": "ComuPik 插件的 API 服务地址，默认 http://127.0.0.1:8080",
+                "type": "string",
+                "default": "http://127.0.0.1:8080"
+            },
+            "target_groups": {
+                "description": "目标 QQ 群列表",
+                "hint": "接收转发图片的 QQ 群号列表，多个群号用逗号分隔",
+                "type": "list",
+                "default": []
+            },
+            "poll_interval": {
+                "description": "轮询间隔（秒）",
+                "hint": "检查新图片的时间间隔，建议 30-60 秒",
+                "type": "int",
+                "slider": {"min": 10, "max": 300, "step": 10},
+                "default": 30
+            },
+            "poll_time_range": {
+                "description": "轮询时间范围（小时）",
+                "hint": "每次轮询获取多少小时内的图片，默认 12 小时",
+                "type": "int",
+                "slider": {"min": 1, "max": 48, "step": 1},
+                "default": 12
+            }
+        }
+    },
+    "group_checkin": {
+        "description": "群打卡配置",
+        "hint": "配置机器人自动打卡的QQ群列表，每个群可独立设置时间段和打卡欲望",
+        "type": "object",
+        "items": {
+            "enabled": {
+                "description": "启用群打卡",
+                "hint": "是否启用群打卡功能",
+                "type": "bool",
+                "default": false
+            },
+            "target_groups": {
+                "description": "打卡群列表",
+                "hint": "配置要打卡的QQ群号列表",
+                "type": "list",
+                "default": [],
+                "items": {"type": "string"}
+            },
+            "timezone": {
+                "description": "时区",
+                "hint": "配置打卡使用的时区，如 Asia/Shanghai、Asia/Tokyo、America/New_York 等，留空使用系统默认时区",
+                "type": "string",
+                "default": "Asia/Shanghai"
+            },
+            "start_time": {
+                "description": "开始时间",
+                "hint": "打卡时间段开始时间，格式 HH:MM，按配置时区计算",
+                "type": "string",
+                "default": "09:00"
+            },
+            "end_time": {
+                "description": "结束时间",
+                "hint": "打卡时间段结束时间，格式 HH:MM，按配置时区计算",
+                "type": "string",
+                "default": "23:00"
+            },
+            "desire": {
+                "description": "打卡欲望",
+                "hint": "打卡概率，0-100%",
+                "type": "int",
+                "slider": {"min": 0, "max": 100, "step": 1},
+                "default": 50
+            },
+            "check_interval": {
+                "description": "检查间隔（分钟）",
+                "hint": "多久检查一次是否需要打卡",
+                "type": "int",
+                "slider": {"min": 1, "max": 60, "step": 1},
+                "default": 10
+            },
+            "enable_guarantee": {
+                "description": "启用打卡保底",
+                "hint": "开启后，当晚上特定时间群内无人打卡时，机器人自动保底打卡",
+                "type": "bool",
+                "default": false
+            },
+            "guarantee_check_time": {
+                "description": "保底检查时间",
+                "hint": "每天检查群内是否有人打卡的时间，格式 HH:MM",
+                "type": "string",
+                "default": "22:00"
+            },
+            "guarantee_start_time": {
+                "description": "保底统计开始时间",
+                "hint": "从什么时间开始统计群内打卡情况，格式 HH:MM，建议 00:00",
+                "type": "string",
+                "default": "00:00"
+            }
+        }
     }
-  }
 }

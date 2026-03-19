@@ -14,6 +14,31 @@ from astrbot.api.event import MessageChain
 from .config import LuwanConfig
 from .database import LuwanDB
 
+# 时区偏移映射表（相对于 UTC 的小时偏移）
+TIMEZONE_OFFSETS = {
+    "Asia/Shanghai": 8,
+    "Asia/Hong_Kong": 8,
+    "Asia/Taipei": 8,
+    "Asia/Singapore": 8,
+    "Asia/Tokyo": 9,
+    "Asia/Seoul": 9,
+    "Asia/Bangkok": 7,
+    "Asia/Dubai": 4,
+    "Europe/London": 0,
+    "Europe/Paris": 1,
+    "Europe/Berlin": 1,
+    "Europe/Moscow": 3,
+    "America/New_York": -5,
+    "America/Chicago": -6,
+    "America/Denver": -7,
+    "America/Los_Angeles": -8,
+    "America/Vancouver": -8,
+    "Australia/Sydney": 11,
+    "Australia/Melbourne": 11,
+    "Pacific/Auckland": 13,
+    "UTC": 0,
+}
+
 
 class GroupCheckinService:
     """群打卡服务
@@ -98,14 +123,115 @@ class GroupCheckinService:
         # 为每个群生成随机的打卡时间点（确保与历史不同）
         await self._generate_scheduled_times()
 
+        # 获取时区信息
+        timezone = self.cfg.group_checkin_timezone
+        offset = self._get_timezone_offset()
+        offset_str = f"+{offset}" if offset >= 0 else f"{offset}"
+
         logger.info(
             f"[GroupCheckin] 初始化完成，"
             f"共 {len(self.cfg.group_checkin_target_groups)} 个群，"
+            f"时区: {timezone} (UTC{offset_str})，"
             f"时间段: {self.cfg.group_checkin_start_time}-{self.cfg.group_checkin_end_time}，"
             f"欲望: {self.cfg.group_checkin_desire}%，"
             f"保底功能: {'开启' if self.cfg.group_checkin_enable_guarantee else '关闭'}"
         )
         return True
+
+    def _get_timezone_offset(self) -> int:
+        """获取配置时区相对于 UTC 的偏移小时数
+
+        Returns:
+            时区偏移小时数
+        """
+        timezone = self.cfg.group_checkin_timezone
+        if not timezone:
+            return 8  # 默认使用东八区
+        return TIMEZONE_OFFSETS.get(timezone, 8)
+
+    def _get_config_time_in_local(self, config_time_str: str) -> datetime:
+        """将配置时区的时间转换为机器人本地时间
+
+        Args:
+            config_time_str: 配置时间字符串，格式 HH:MM
+
+        Returns:
+            本地时间的 datetime 对象（日期为今天）
+        """
+        try:
+            # 解析配置时间
+            h, m = map(int, config_time_str.split(":"))
+
+            # 获取当前本地时间
+            now = datetime.now()
+
+            # 计算时区偏移差（配置时区 - 本地时区）
+            config_offset = self._get_timezone_offset()
+            # 获取本地时区偏移（简化处理，假设本地时间为系统时间）
+            # 使用本地时间的 UTC 偏移
+            local_offset = -int(now.astimezone().utcoffset().total_seconds() / 3600)
+
+            # 计算时间差
+            offset_diff = config_offset - local_offset
+
+            # 创建配置时区的 datetime
+            config_datetime = now.replace(hour=h, minute=m, second=0, microsecond=0)
+
+            # 转换为本地时间
+            local_datetime = config_datetime - timedelta(hours=offset_diff)
+
+            return local_datetime
+        except Exception as e:
+            logger.warning(f"[GroupCheckin] 时区转换失败: {e}，使用原始时间")
+            h, m = map(int, config_time_str.split(":"))
+            now = datetime.now()
+            return now.replace(hour=h, minute=m, second=0, microsecond=0)
+
+    def _get_current_time_in_config_timezone(self) -> str:
+        """获取配置时区的当前时间字符串
+
+        Returns:
+            配置时区的当前时间 HH:MM
+        """
+        try:
+            # 获取当前本地时间
+            now = datetime.now()
+
+            # 计算时区偏移差
+            config_offset = self._get_timezone_offset()
+            local_offset = -int(now.astimezone().utcoffset().total_seconds() / 3600)
+            offset_diff = config_offset - local_offset
+
+            # 转换为配置时区时间
+            config_now = now + timedelta(hours=offset_diff)
+
+            return config_now.strftime("%H:%M")
+        except Exception as e:
+            logger.warning(f"[GroupCheckin] 获取配置时区时间失败: {e}，使用本地时间")
+            return datetime.now().strftime("%H:%M")
+
+    def _get_current_date_in_config_timezone(self) -> str:
+        """获取配置时区的当前日期字符串
+
+        Returns:
+            配置时区的当前日期 YYYY-MM-DD
+        """
+        try:
+            # 获取当前本地时间
+            now = datetime.now()
+
+            # 计算时区偏移差
+            config_offset = self._get_timezone_offset()
+            local_offset = -int(now.astimezone().utcoffset().total_seconds() / 3600)
+            offset_diff = config_offset - local_offset
+
+            # 转换为配置时区时间
+            config_now = now + timedelta(hours=offset_diff)
+
+            return config_now.strftime("%Y-%m-%d")
+        except Exception as e:
+            logger.warning(f"[GroupCheckin] 获取配置时区日期失败: {e}，使用本地日期")
+            return datetime.now().strftime("%Y-%m-%d")
 
     async def _generate_scheduled_times(self) -> None:
         """为每个群生成随机的打卡时间点（确保与历史不同）"""
@@ -120,6 +246,9 @@ class GroupCheckinService:
 
         # 计算时间段内有多少个可能的分钟点
         total_minutes = end_minutes - start_minutes + 1
+
+        # 获取时区信息用于日志
+        timezone = self.cfg.group_checkin_timezone
 
         for group_id in self.cfg.group_checkin_target_groups:
             if not group_id:
@@ -152,7 +281,7 @@ class GroupCheckinService:
                     time_str = f"{h:02d}:{m:02d}"
                     available_times.append(time_str)
 
-            # 随机选择一个可用时间
+            # 随机选择一个可用时间（配置时区的时间）
             scheduled_time = random.choice(available_times)
 
             # 记录为已使用
@@ -162,10 +291,21 @@ class GroupCheckinService:
             self._checkin_attempts[group_id] = 0
             self._checkin_failed[group_id] = False
 
-            logger.info(
-                f"[GroupCheckin] 群 {group_id} 计划打卡时间: {scheduled_time} "
-                f"(已使用 {len(used_times)}/{total_minutes} 个时间点)"
-            )
+            # 计算本地时间用于日志显示
+            local_time = self._get_config_time_in_local(scheduled_time)
+            local_time_str = local_time.strftime("%H:%M")
+
+            if timezone and timezone != "":
+                logger.info(
+                    f"[GroupCheckin] 群 {group_id} 计划打卡时间: {scheduled_time} ({timezone}) "
+                    f"-> 本地时间: {local_time_str} "
+                    f"(已使用 {len(used_times)}/{total_minutes} 个时间点)"
+                )
+            else:
+                logger.info(
+                    f"[GroupCheckin] 群 {group_id} 计划打卡时间: {scheduled_time} "
+                    f"(已使用 {len(used_times)}/{total_minutes} 个时间点)"
+                )
 
     async def start(self) -> None:
         """启动打卡服务"""
@@ -203,8 +343,9 @@ class GroupCheckinService:
 
         while self._running:
             try:
-                now = datetime.now()
-                current_hour = now.strftime("%H:00")
+                # 获取配置时区的当前时间
+                current_time = self._get_current_time_in_config_timezone()
+                current_hour = current_time[:2] + ":00"
 
                 # 每小时输出一次各群的下次打卡时间
                 if current_hour != last_log_time:
@@ -222,11 +363,21 @@ class GroupCheckinService:
         if not self._scheduled_times:
             return
 
-        now = datetime.now()
-        current_time = now.strftime("%H:%M")
+        # 获取配置时区的当前时间
+        config_time = self._get_current_time_in_config_timezone()
+        local_time = datetime.now().strftime("%H:%M")
+        timezone = self.cfg.group_checkin_timezone
 
         logger.info("[GroupCheckin] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        logger.info(f"[GroupCheckin] 各群下次打卡时间 (当前时间: {current_time}):")
+        if timezone and timezone != "":
+            logger.info(
+                f"[GroupCheckin] 各群下次打卡时间 (配置时区 {timezone}: {config_time}, 本地: {local_time}):"
+            )
+        else:
+            logger.info(f"[GroupCheckin] 各群下次打卡时间 (当前时间: {config_time}):")
+
+        # 获取当前本地时间用于计算下次重试时间
+        now = datetime.now()
 
         for group_id in self.cfg.group_checkin_target_groups:
             if not group_id:
@@ -266,11 +417,11 @@ class GroupCheckinService:
 
     async def _process_checkin(self) -> None:
         """处理打卡逻辑"""
-        now = datetime.now()
-        current_time = now.strftime("%H:%M")
-        today = now.strftime("%Y-%m-%d")
+        # 获取配置时区的当前时间和日期
+        current_time = self._get_current_time_in_config_timezone()
+        today = self._get_current_date_in_config_timezone()
 
-        # 检查是否需要重置状态（新的一天）
+        # 检查是否需要重置状态（新的一天，按配置时区）
         if not hasattr(self, "_last_check_date") or self._last_check_date != today:
             self._guarantee_checked_today = False
             self._scheduled_times = {}
@@ -364,21 +515,37 @@ class GroupCheckinService:
         Args:
             group_id: QQ群号
         """
-        now = datetime.now()
-        current_minutes = now.hour * 60 + now.minute
+        # 获取配置时区的当前时间
+        config_now_str = self._get_current_time_in_config_timezone()
+        config_h, config_m = map(int, config_now_str.split(":"))
+        current_minutes = config_h * 60 + config_m
 
         end_time = self.cfg.group_checkin_end_time
         end_h, end_m = map(int, end_time.split(":"))
         end_minutes = end_h * 60 + end_m
 
-        # 在当前时间之后、结束时间之前随机选择
+        # 在当前时间之后、结束时间之前随机选择（配置时区）
         if current_minutes < end_minutes:
             random_minutes = random.randint(current_minutes + 1, end_minutes)
             random_h = random_minutes // 60
             random_m = random_minutes % 60
             new_time = f"{random_h:02d}:{random_m:02d}"
             self._scheduled_times[group_id] = new_time
-            logger.info(f"[GroupCheckin] 群 {group_id} 重新安排打卡时间: {new_time}")
+
+            # 计算本地时间用于日志
+            local_time = self._get_config_time_in_local(new_time)
+            local_time_str = local_time.strftime("%H:%M")
+            timezone = self.cfg.group_checkin_timezone
+
+            if timezone and timezone != "":
+                logger.info(
+                    f"[GroupCheckin] 群 {group_id} 重新安排打卡时间: {new_time} ({timezone}) "
+                    f"-> 本地时间: {local_time_str}"
+                )
+            else:
+                logger.info(
+                    f"[GroupCheckin] 群 {group_id} 重新安排打卡时间: {new_time}"
+                )
 
     async def _do_checkin(self, group_id: str, checkin_type: str = "normal") -> bool:
         """执行QQ群打卡

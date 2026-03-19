@@ -149,6 +149,12 @@ class LuwanConfig:
         return self._clean_ids(groups)
 
     @property
+    def group_checkin_timezone(self) -> str:
+        """群打卡时区"""
+        group_checkin = self.get("group_checkin", {})
+        return group_checkin.get("timezone", "Asia/Shanghai")
+
+    @property
     def group_checkin_start_time(self) -> str:
         """群打卡开始时间（HH:MM）"""
         group_checkin = self.get("group_checkin", {})

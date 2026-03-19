@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.5.6] - 2025-03-19
+
+### Added
+
+- feat(group_checkin): 添加时区配置支持
+- feat(group_checkin): 支持配置时区如 Asia/Shanghai、Asia/Tokyo、America/New_York 等
+- feat(group_checkin): 所有打卡时间按配置时区计算并转换为本地时间执行
+- feat(group_checkin): 日志显示配置时区和本地时间的对比
+
+### Fixed
+
+- fix(config): 移除 _conf_schema.json 中的尾随逗号，确保符合 JSON 标准
+
 ## [v1.5.5] - 2025-03-19
 
 ### Changed

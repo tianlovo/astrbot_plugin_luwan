@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.5.8] - 2025-03-19
+
+### Changed
+
+- refactor(project): 重构项目结构，提高代码可维护性
+- refactor(service): 将后台服务类移至 `service/` 包，添加 `srv_` 前缀
+  - `group_checkin.py` -> `service/srv_group_checkin.py`
+  - `image_forwarder.py` -> `service/srv_image_forwarder.py`
+  - `comupik_client.py` -> `service/srv_comupik_client.py`
+- refactor(command): 将指令处理类移至 `command/` 包，添加 `cmd_` 前缀和 `_handler` 后缀
+  - `title_handler.py` -> `command/cmd_title_handler.py`
+  - `help_handler.py` -> `command/cmd_help_handler.py`
+- refactor(main): 更新所有导入语句，适配新的文件路径
+
 ## [v1.5.7] - 2025-03-19
 
 ### Added

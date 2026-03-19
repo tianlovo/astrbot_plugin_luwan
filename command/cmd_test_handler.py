@@ -51,42 +51,21 @@ class TestHandler:
         Args:
             event: 消息事件对象
         """
-        json_data = {
-            "appName": "bilibili",
-            "appView": "video",
-            "ver": "1.0.0",
-            "desc": "桑多涅 Jeb Nid Nid 【原神MMD】",
-            "prompt": "[Bilibili]",
-            "metaData": {
-                "detail_1": {
-                    "appid": "333",
-                    "appType": 13,
-                    "title": "桑多涅 Jeb Nid Nid 【原神MMD】",
-                    "desc": "桑多涅 Jeb Nid Nid 【原神MMD】",
-                    "icon": "",
-                    "preview": "",
-                    "url": "https://www.bilibili.com/video/BV1FAcfzJE3Q",
-                    "scene": 0,
-                    "host": {"uin": 0, "nick": ""},
-                    "shareTemplateId": "",
-                    "shareTemplateData": {},
-                    "showLittleTail": "",
-                    "gamePoints": "",
-                    "gamePointsUrl": "",
-                    "shareOrigin": 0,
-                }
-            },
-            "config": {
-                "type": "normal",
-                "width": 0,
-                "height": 0,
-                "forward": 1,
-                "autoSize": 0,
-                "ctime": 0,
-                "token": "",
-            },
-        }
+        try:
+            result = await event.bot.call_action(
+                "get_mini_app_ark",
+                type="bili",
+                title="桑多涅 Jeb Nid Nid 【原神MMD】",
+                desc="桑多涅 Jeb Nid Nid 【原神MMD】",
+                picUrl="",
+                jumpUrl="https://www.bilibili.com/video/BV1FAcfzJE3Q",
+                webUrl="https://www.bilibili.com/video/BV1FAcfzJE3Q",
+            )
 
-        chain = Comp.MessageChain().append(Comp.Json(data=json_data))
-        await event.send(chain)
-        logger.info("[LuwanPlugin] Bilibili小程序卡片已发送")
+            json_data = result.get("data", {})
+            chain = Comp.MessageChain().append(Comp.Json(data=json_data))
+            await event.send(chain)
+            logger.info("[LuwanPlugin] Bilibili小程序卡片已发送")
+        except Exception as e:
+            logger.error(f"[LuwanPlugin] 获取小程序卡片失败: {e}")
+            await event.send(event.plain_result(f"❌ 获取小程序卡片失败: {e}"))

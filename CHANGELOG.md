@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.6.5] - 2025-03-19
+
+### Changed
+
+- refactor(test): 通过 bot API 调用 get_mini_app_ark 获取小程序卡片 JSON
+
 ## [v1.6.4] - 2025-03-19
 
 ### Changed

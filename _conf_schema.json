@@ -219,12 +219,12 @@
                 "slider": {"min": 0, "max": 2, "step": 0.1},
                 "default": 0.5
             },
-            "cooldown_hours": {
-                "description": "冷却时间（小时）",
+            "cooldown_minutes": {
+                "description": "冷却时间（分钟）",
                 "hint": "同一用户被戳后需要等待多久才能再次被戳",
                 "type": "float",
-                "slider": {"min": 0.5, "max": 6, "step": 0.5},
-                "default": 1.0
+                "slider": {"min": 1, "max": 60, "step": 1},
+                "default": 5.0
             },
             "antipoke_enabled": {
                 "description": "启用反戳",

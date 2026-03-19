@@ -254,10 +254,10 @@ class LuwanConfig:
         return poke.get("beta5", 0.5)
 
     @property
-    def poke_cooldown_hours(self) -> float:
-        """戳一戳冷却时间（小时）"""
+    def poke_cooldown_minutes(self) -> float:
+        """戳一戳冷却时间（分钟）"""
         poke = self.get("poke", {})
-        return poke.get("cooldown_hours", 1.0)
+        return poke.get("cooldown_minutes", 5)
 
     @property
     def poke_antipoke_enabled(self) -> bool:

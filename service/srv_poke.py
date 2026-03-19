@@ -137,13 +137,13 @@ class PokeService:
 
         last_poke_time = await self.db.get_last_poke_time(user_id)
         current_time = int(datetime.now().timestamp())
-        cooldown_seconds = self.cfg.poke_cooldown_hours * 3600
+        cooldown_seconds = self.cfg.poke_cooldown_minutes * 60
 
         if last_poke_time and (current_time - last_poke_time) < cooldown_seconds:
             hours_since = (current_time - last_poke_time) / 3600.0
             logger.info(
                 f"[PokeService] 用户 {user_id} 消息分析 | 冷却中 | "
-                f"已过:{hours_since:.1f}h/{self.cfg.poke_cooldown_hours}h"
+                f"已过:{hours_since:.1f}分钟/{self.cfg.poke_cooldown_minutes}分钟"
             )
             return False
 

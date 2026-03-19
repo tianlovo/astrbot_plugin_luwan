@@ -11,7 +11,7 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
 )
 from astrbot.core.star.filter.event_message_type import EventMessageType
 
-from .command import HelpHandler, TestHandler, TitleHandler
+from .command import HelpHandler, MuteHandler, TestHandler, TitleHandler
 from .infra import LuwanConfig, LuwanDB, Messages
 from .service import GroupCheckinService, ImageForwarder, PokeService
 
@@ -44,6 +44,7 @@ class LuwanPlugin(Star):
         self.image_forwarder: ImageForwarder | None = None
         self.group_checkin: GroupCheckinService | None = None
         self.test_handler: TestHandler | None = None
+        self.mute_handler: MuteHandler | None = None
         self.poke_service: PokeService | None = None
 
     async def initialize(self) -> None:
@@ -52,6 +53,7 @@ class LuwanPlugin(Star):
             await self.db.init()
             self.title_handler = TitleHandler(self.cfg, self.db)
             self.test_handler = TestHandler(self.cfg, self.context)
+            self.mute_handler = MuteHandler(self.cfg)
             self.poke_service = PokeService(self.cfg, self.db, self.context)
 
             # 初始化 ComuPik 图片转发服务
@@ -339,39 +341,9 @@ class LuwanPlugin(Star):
     @filter.command("禁言我", alias={"把我禁言"})
     @filter.event_message_type(EventMessageType.GROUP_MESSAGE)
     async def handle_mute_me(self, event: AiocqhttpMessageEvent) -> None:
-        """禁言我命令
-
-        指令: 禁言我 / 把我禁言
-        功能: 让机器人将发送者禁言指定时长
-        """
-        try:
-            user_id = event.get_sender_id()
-            group_id = event.get_group_id()
-
-            if not group_id or not user_id:
-                return
-
-            if not self.cfg.mute_enabled:
-                return
-
-            if group_id not in self.cfg.mute_enabled_groups:
-                return
-
-            duration_minutes = self.cfg.mute_duration
-            duration_seconds = duration_minutes * 60
-
-            await event.bot.set_group_ban(
-                group_id=int(group_id),
-                user_id=int(user_id),
-                duration=duration_seconds,
-            )
-
-            logger.info(
-                f"[LuwanPlugin] 用户 {user_id} 在群 {group_id} 自愿被禁言 {duration_minutes} 分钟"
-            )
-
-        except Exception as e:
-            logger.warning(f"[LuwanPlugin] 禁言失败: {e}")
+        """禁言我命令"""
+        if self.mute_handler:
+            await self.mute_handler.handle_mute_me(event)
 
     # ==================== Bot实例捕获 ====================
 

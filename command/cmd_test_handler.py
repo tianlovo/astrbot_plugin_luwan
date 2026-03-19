@@ -3,6 +3,9 @@
 提供测试功能的处理（仅超级管理员可用）
 """
 
+import json
+import re
+
 import astrbot.api.message_components as Comp
 from astrbot.api import logger
 from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
@@ -25,6 +28,7 @@ class TestHandler:
             config: 插件配置对象
         """
         self.config = config
+        self._analyze_groups: set[str] = set()
 
     async def handle_test(self, event: AiocqhttpMessageEvent) -> None:
         """处理测试命令
@@ -42,8 +46,10 @@ class TestHandler:
 
         if "分享" in message_str:
             await self._test_share(event)
+        elif "分析" in message_str:
+            await self._test_analyze(event)
         else:
-            await event.send(event.plain_result("可用子命令：分享"))
+            await event.send(event.plain_result("可用子命令：分享、分析"))
 
     async def _test_share(self, event: AiocqhttpMessageEvent) -> None:
         """测试分享功能
@@ -69,3 +75,95 @@ class TestHandler:
         except Exception as e:
             logger.error(f"[LuwanPlugin] 获取小程序卡片失败: {e}")
             await event.send(event.plain_result(f"❌ 获取小程序卡片失败: {e}"))
+
+    async def _test_analyze(self, event: AiocqhttpMessageEvent) -> None:
+        """测试分析功能
+
+        Args:
+            event: 消息事件对象
+        """
+        message_str = event.message_str.strip()
+        match = re.search(r"分析\s*(\d+)", message_str)
+
+        if not match:
+            status = (
+                "、".join(sorted(self._analyze_groups))
+                if self._analyze_groups
+                else "无"
+            )
+            await event.send(
+                event.plain_result(
+                    f"📊 分析功能状态\n━━━━━━━━━━━━━━\n"
+                    f"监控群: {status}\n"
+                    f"━━━━━━━━━━━━━━\n"
+                    f"使用: 分析 <群号> 切换开关"
+                )
+            )
+            return
+
+        group_id = match.group(1)
+
+        if group_id in self._analyze_groups:
+            self._analyze_groups.discard(group_id)
+            await event.send(event.plain_result(f"✅ 已关闭群 {group_id} 的分析功能"))
+            logger.info(f"[LuwanPlugin] 已关闭群 {group_id} 的分析功能")
+        else:
+            self._analyze_groups.add(group_id)
+            await event.send(event.plain_result(f"✅ 已开启群 {group_id} 的分析功能"))
+            logger.info(f"[LuwanPlugin] 已开启群 {group_id} 的分析功能")
+
+    async def should_analyze(self, group_id: str) -> bool:
+        """检查是否应该分析某群的消息
+
+        Args:
+            group_id: 群号
+
+        Returns:
+            是否应该分析
+        """
+        return group_id in self._analyze_groups
+
+    async def analyze_message(self, event: AiocqhttpMessageEvent) -> None:
+        """分析并转发消息内容
+
+        Args:
+            event: 消息事件对象
+        """
+        group_id = event.get_group_id()
+        if not group_id or not await self.should_analyze(group_id):
+            return
+
+        try:
+            message_chain = event.message_chain
+            analysis_parts = []
+
+            for segment in message_chain:
+                if hasattr(segment, "type"):
+                    if segment.type == "json":
+                        json_data = getattr(segment, "data", {})
+                        if isinstance(json_data, str):
+                            try:
+                                json_data = json.loads(json_data)
+                            except Exception:
+                                pass
+                        analysis_parts.append(
+                            f"📦 JSON:\n{json.dumps(json_data, ensure_ascii=False, indent=2)}"
+                        )
+                    elif segment.type == "image":
+                        analysis_parts.append(
+                            f"🖼️ 图片: {getattr(segment, 'url', 'N/A')}"
+                        )
+                    elif segment.type == "text":
+                        analysis_parts.append(f"📝 文本: {segment.data}")
+                    else:
+                        analysis_parts.append(f"🔧 {segment.type}: {segment.data}")
+
+            if analysis_parts:
+                analysis_text = "\n\n".join(analysis_parts)
+                await event.send(
+                    event.plain_result(
+                        f"🔍 群 {group_id} 消息分析\n━━━━━━━━━━━━━━\n{analysis_text}\n━━━━━━━━━━━━━━"
+                    )
+                )
+        except Exception as e:
+            logger.error(f"[LuwanPlugin] 分析消息失败: {e}")

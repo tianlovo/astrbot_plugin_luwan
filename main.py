@@ -20,7 +20,7 @@ from .service import GroupCheckinService, ImageForwarder
     "astrbot_plugin_luwan",
     "Luwan",
     "AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能",
-    "1.6.5",
+    "1.6.6",
 )
 class LuwanPlugin(Star):
     """鹿丸插件主类
@@ -348,6 +348,13 @@ class LuwanPlugin(Star):
             ):
                 if event.bot and not self.group_checkin._bot_instance:
                     self.group_checkin.set_bot_instance(event.bot)
+
+            if (
+                self.test_handler
+                and event.get_platform_name() == "aiocqhttp"
+                and isinstance(event, AiocqhttpMessageEvent)
+            ):
+                await self.test_handler.analyze_message(event)
         except Exception as e:
             logger.debug(f"[LuwanPlugin] 捕获Bot实例失败: {e}")
 

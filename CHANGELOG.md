@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.6.6] - 2025-03-19
+
+### Added
+
+- feat(test): 添加"测试 分析"子命令，可切换开启/关闭指定群的消息分析功能
+- feat(test): 对开启分析功能的群，每条消息都会被解析并转发，特别是 JSON 消息
+
 ## [v1.6.5] - 2025-03-19
 
 ### Changed

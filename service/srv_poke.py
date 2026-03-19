@@ -130,6 +130,7 @@ class PokeService:
             是否应该戳一戳
         """
         if not self.is_group_enabled(group_id):
+            logger.debug(f"[PokeService] 群 {group_id} 未启用戳一戳")
             return False
 
         is_admin = self.cfg.is_admin(user_id)
@@ -140,8 +141,9 @@ class PokeService:
 
         if last_poke_time and (current_time - last_poke_time) < cooldown_seconds:
             hours_since = (current_time - last_poke_time) / 3600.0
-            logger.debug(
-                f"[PokeService] 用户 {user_id} 还在冷却中 ({hours_since:.2f} 小时)"
+            logger.info(
+                f"[PokeService] 用户 {user_id} 消息分析 | 冷却中 | "
+                f"已过:{hours_since:.1f}h/{self.cfg.poke_cooldown_hours}h"
             )
             return False
 
@@ -166,8 +168,12 @@ class PokeService:
         )
 
         should_poke = random.random() < probability
-        logger.debug(
-            f"[PokeService] 用户 {user_id} 戳一戳概率: {probability:.4f}, 结果: {should_poke}"
+        trigger_words = self.cfg.poke_trigger_words
+        x1 = any(word in message_text for word in trigger_words)
+        logger.info(
+            f"[PokeService] 用户 {user_id} 消息分析 | 触发词:{x1} | 管理员:{is_admin} | "
+            f"间隔:{hours_since_last:.1f}h | 活跃:{recent_count} | 时间:{current_hour}:00 | "
+            f"概率:{probability:.4f} | 结果:{'戳' if should_poke else '跳过'}"
         )
 
         return should_poke

@@ -50,7 +50,7 @@ class LuwanPlugin(Star):
         try:
             await self.db.init()
             self.title_handler = TitleHandler(self.cfg, self.db)
-            self.test_handler = TestHandler(self.cfg)
+            self.test_handler = TestHandler(self.cfg, self.context)
 
             # 初始化 ComuPik 图片转发服务
             await self.db.init_comupik_tables()

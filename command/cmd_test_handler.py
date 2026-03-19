@@ -4,13 +4,13 @@
 """
 
 import json
-import re
 
 import astrbot.api.message_components as Comp
 from astrbot.api import logger
 from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
     AiocqhttpMessageEvent,
 )
+from astrbot.core.star.context import Context
 
 from ..infra import LuwanConfig
 
@@ -21,13 +21,15 @@ class TestHandler:
     提供测试功能的处理（仅超级管理员可用）
     """
 
-    def __init__(self, config: LuwanConfig):
+    def __init__(self, config: LuwanConfig, context: Context):
         """初始化测试处理器
 
         Args:
             config: 插件配置对象
+            context: 插件上下文
         """
         self.config = config
+        self.context = context
         self._analyze_groups: set[str] = set()
 
     async def handle_test(self, event: AiocqhttpMessageEvent) -> None:
@@ -49,7 +51,11 @@ class TestHandler:
         elif "分析" in message_str:
             await self._test_analyze(event)
         else:
-            await event.send(event.plain_result("可用子命令：分享、分析（在当前群发送可开启/关闭该群的分析）"))
+            await event.send(
+                event.plain_result(
+                    "可用子命令：分享、分析（在当前群发送可开启/关闭该群的分析）"
+                )
+            )
 
     async def _test_share(self, event: AiocqhttpMessageEvent) -> None:
         """测试分享功能
@@ -89,11 +95,11 @@ class TestHandler:
 
         if group_id in self._analyze_groups:
             self._analyze_groups.discard(group_id)
-            await event.send(event.plain_result(f"✅ 已关闭当前群的分析功能"))
+            await event.send(event.plain_result("✅ 已关闭当前群的分析功能"))
             logger.info(f"[LuwanPlugin] 已关闭群 {group_id} 的分析功能")
         else:
             self._analyze_groups.add(group_id)
-            await event.send(event.plain_result(f"✅ 已开启当前群的分析功能"))
+            await event.send(event.plain_result("✅ 已开启当前群的分析功能"))
             logger.info(f"[LuwanPlugin] 已开启群 {group_id} 的分析功能")
 
     async def should_analyze(self, group_id: str) -> bool:
@@ -144,10 +150,15 @@ class TestHandler:
 
             if analysis_parts:
                 analysis_text = "\n\n".join(analysis_parts)
-                await event.send(
-                    event.plain_result(
-                        f"🔍 群 {group_id} 消息分析\n━━━━━━━━━━━━━━\n{analysis_text}\n━━━━━━━━━━━━━━"
-                    )
+                chain = Comp.MessageChain().plain(
+                    f"🔍 群 {group_id} 消息分析\n━━━━━━━━━━━━━━\n{analysis_text}\n━━━━━━━━━━━━━━"
                 )
+
+                platform = self.context.get_platform("aiocqhttp")
+                if platform:
+                    platform_id = platform.metadata.id
+                    umo = f"{platform_id}:GroupMessage:{group_id}"
+                    await self.context.send_message(umo, chain)
+                logger.info(f"[LuwanPlugin] 已分析群 {group_id} 的消息")
         except Exception as e:
             logger.error(f"[LuwanPlugin] 分析消息失败: {e}")

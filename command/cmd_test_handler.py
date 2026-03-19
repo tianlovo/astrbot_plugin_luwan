@@ -150,11 +150,13 @@ class TestHandler:
 
             if analysis_parts:
                 analysis_text = "\n\n".join(analysis_parts)
-                chain = Comp.MessageChain().plain(
-                    f"🔍 群 {group_id} 消息分析\n━━━━━━━━━━━━━━\n{analysis_text}\n━━━━━━━━━━━━━━"
-                )
+                chain = [
+                    Comp.Plain(
+                        f"🔍 群 {group_id} 消息分析\n━━━━━━━━━━━━━━\n{analysis_text}\n━━━━━━━━━━━━━━"
+                    )
+                ]
 
-                await self.context.send_message(event.unified_msg_origin, chain)
+                await event.send(event.chain_result(chain))
                 logger.info(f"[LuwanPlugin] 已分析群 {group_id} 的消息")
         except Exception as e:
             logger.error(f"[LuwanPlugin] 分析消息失败: {e}")

@@ -7,6 +7,7 @@ import json
 
 import astrbot.api.message_components as Comp
 from astrbot.api import logger
+from astrbot.core.message.components import ComponentType
 from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
     AiocqhttpMessageEvent,
 )
@@ -129,7 +130,7 @@ class TestHandler:
 
             for segment in message_chain:
                 segment_type = getattr(segment, "type", None)
-                if segment_type == "json":
+                if segment_type == ComponentType.Json.value:
                     json_data = getattr(segment, "data", {})
                     if isinstance(json_data, str):
                         try:
@@ -137,7 +138,7 @@ class TestHandler:
                         except Exception:
                             pass
                     analysis_parts.append(
-                        f"📦 JSON:\n{json.dumps(json_data, ensure_ascii=False, indent=2)}"
+                        f"📦 JSON ({ComponentType.Json.value}):\n{json.dumps(json_data, ensure_ascii=False, indent=2)}"
                     )
                 elif segment_type == "image":
                     url = getattr(segment, "url", "N/A")

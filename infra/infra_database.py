@@ -499,9 +499,79 @@ class LuwanDB:
 
             await self._conn.commit()
             logger.info("[LuwanDB] 群打卡相关表初始化完成")
+
+            await self._init_poke_tables()
         except Exception as e:
             logger.error(f"[LuwanDB] 群打卡表初始化失败: {e}")
             raise
+
+    async def _init_poke_tables(self) -> None:
+        """初始化戳一戳相关表"""
+        if not self._conn:
+            raise RuntimeError("数据库未初始化")
+
+        try:
+            await self._conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS poke_cooldowns (
+                    user_id TEXT NOT NULL,
+                    last_poke_time INTEGER NOT NULL,
+                    poke_count INTEGER DEFAULT 0,
+                    PRIMARY KEY(user_id)
+                )
+                """
+            )
+
+            await self._conn.execute(
+                """
+                CREATE INDEX IF NOT EXISTS idx_poke_user
+                ON poke_cooldowns(user_id)
+                """
+            )
+
+            await self._conn.commit()
+            logger.info("[LuwanDB] 戳一戳相关表初始化完成")
+        except Exception as e:
+            logger.error(f"[LuwanDB] 戳一戳表初始化失败: {e}")
+            raise
+
+    async def get_last_poke_time(self, user_id: str) -> int | None:
+        """获取用户上次被戳的时间
+
+        Args:
+            user_id: 用户ID
+
+        Returns:
+            上次戳人时间戳，如果不存在返回 None
+        """
+        if not self._conn:
+            raise RuntimeError("数据库未初始化")
+
+        async with self._conn.execute(
+            "SELECT last_poke_time FROM poke_cooldowns WHERE user_id = ?",
+            (user_id,),
+        ) as cursor:
+            row = await cursor.fetchone()
+            return row["last_poke_time"] if row else None
+
+    async def update_last_poke_time(self, user_id: str, poke_time: int) -> None:
+        """更新用户上次被戳的时间
+
+        Args:
+            user_id: 用户ID
+            poke_time: 戳人时间戳
+        """
+        if not self._conn:
+            raise RuntimeError("数据库未初始化")
+
+        await self._conn.execute(
+            """
+            INSERT OR REPLACE INTO poke_cooldowns (user_id, last_poke_time, poke_count)
+            VALUES (?, ?, COALESCE((SELECT poke_count FROM poke_cooldowns WHERE user_id = ?), 0) + 1)
+            """,
+            (user_id, poke_time, user_id),
+        )
+        await self._conn.commit()
 
     async def is_group_checked_in_today(
         self, group_id: str, start_time: str = None

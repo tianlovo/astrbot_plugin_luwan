@@ -13,14 +13,14 @@ from astrbot.core.star.filter.event_message_type import EventMessageType
 
 from .command import HelpHandler, TestHandler, TitleHandler
 from .infra import LuwanConfig, LuwanDB, Messages
-from .service import GroupCheckinService, ImageForwarder
+from .service import GroupCheckinService, ImageForwarder, PokeService
 
 
 @register(
     "astrbot_plugin_luwan",
     "Luwan",
     "AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能",
-    "1.6.7",
+    "1.6.8",
 )
 class LuwanPlugin(Star):
     """鹿丸插件主类
@@ -44,6 +44,7 @@ class LuwanPlugin(Star):
         self.image_forwarder: ImageForwarder | None = None
         self.group_checkin: GroupCheckinService | None = None
         self.test_handler: TestHandler | None = None
+        self.poke_service: PokeService | None = None
 
     async def initialize(self) -> None:
         """异步初始化插件"""
@@ -51,6 +52,7 @@ class LuwanPlugin(Star):
             await self.db.init()
             self.title_handler = TitleHandler(self.cfg, self.db)
             self.test_handler = TestHandler(self.cfg, self.context)
+            self.poke_service = PokeService(self.cfg, self.db, self.context)
 
             # 初始化 ComuPik 图片转发服务
             await self.db.init_comupik_tables()
@@ -355,6 +357,19 @@ class LuwanPlugin(Star):
                 and isinstance(event, AiocqhttpMessageEvent)
             ):
                 await self.test_handler.analyze_message(event)
+
+            if (
+                self.poke_service
+                and event.get_platform_name() == "aiocqhttp"
+                and isinstance(event, AiocqhttpMessageEvent)
+            ):
+                group_id = event.get_group_id()
+                user_id = event.get_sender_id()
+                message_text = event.message_str
+                if group_id and user_id:
+                    await self.poke_service.on_group_message(
+                        group_id, user_id, message_text
+                    )
         except Exception as e:
             logger.debug(f"[LuwanPlugin] 捕获Bot实例失败: {e}")
 

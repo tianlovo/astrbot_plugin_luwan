@@ -196,6 +196,69 @@ class LuwanConfig:
         group_checkin = self.get("group_checkin", {})
         return group_checkin.get("guarantee_start_time", "00:00")
 
+    # ==================== 戳一戳配置 ====================
+
+    @property
+    def poke_enabled(self) -> bool:
+        """是否启用戳一戳功能"""
+        poke = self.get("poke", {})
+        return poke.get("enabled", False)
+
+    @property
+    def poke_enabled_groups(self) -> list[str]:
+        """戳一戳启用群列表"""
+        poke = self.get("poke", {})
+        groups = poke.get("enabled_groups", [])
+        return self._clean_ids(groups)
+
+    @property
+    def poke_trigger_words(self) -> list[str]:
+        """戳一戳触发词列表"""
+        poke = self.get("poke", {})
+        return poke.get("trigger_words", ["戳", "机器人", "bot"])
+
+    @property
+    def poke_beta0(self) -> float:
+        """戳一戳基础概率参数 β0"""
+        poke = self.get("poke", {})
+        return poke.get("beta0", -2.0)
+
+    @property
+    def poke_beta1(self) -> float:
+        """戳一戳触发词权重 β1"""
+        poke = self.get("poke", {})
+        return poke.get("beta1", 3.0)
+
+    @property
+    def poke_beta2(self) -> float:
+        """戳一戳管理员权重 β2"""
+        poke = self.get("poke", {})
+        return poke.get("beta2", -2.0)
+
+    @property
+    def poke_beta3(self) -> float:
+        """戳一戳时间间隔权重 β3"""
+        poke = self.get("poke", {})
+        return poke.get("beta3", 1.0)
+
+    @property
+    def poke_beta4(self) -> float:
+        """戳一戳群活跃度权重 β4"""
+        poke = self.get("poke", {})
+        return poke.get("beta4", 1.0)
+
+    @property
+    def poke_beta5(self) -> float:
+        """戳一戳时间段权重 β5"""
+        poke = self.get("poke", {})
+        return poke.get("beta5", 0.5)
+
+    @property
+    def poke_cooldown_hours(self) -> float:
+        """戳一戳冷却时间（小时）"""
+        poke = self.get("poke", {})
+        return poke.get("cooldown_hours", 1.0)
+
     def is_admin(self, user_id: str) -> bool:
         """检查用户是否为管理员
 

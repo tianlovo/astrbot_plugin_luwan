@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.6.8] - 2025-03-19
+
+### Added
+
+- feat(poke): 添加戳一戳服务，基于概率模型决定是否戳一戳发言人
+- feat(poke): 支持配置启用群列表、触发词、权重参数、冷却时间
+
 ## [v1.6.7] - 2025-03-19
 
 ### Fixed

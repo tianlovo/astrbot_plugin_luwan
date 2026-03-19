@@ -12,9 +12,7 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
 from astrbot.core.star.filter.event_message_type import EventMessageType
 
 from .command import HelpHandler, TitleHandler
-from .config import LuwanConfig
-from .database import LuwanDB
-from .messages import Messages
+from .infra import LuwanConfig, LuwanDB, Messages
 from .service import GroupCheckinService, ImageForwarder
 
 
@@ -22,7 +20,7 @@ from .service import GroupCheckinService, ImageForwarder
     "astrbot_plugin_luwan",
     "Luwan",
     "AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能",
-    "1.5.9",
+    "1.6.0",
 )
 class LuwanPlugin(Star):
     """鹿丸插件主类

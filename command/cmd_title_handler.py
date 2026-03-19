@@ -12,9 +12,7 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
     AiocqhttpMessageEvent,
 )
 
-from ..config import LuwanConfig
-from ..database import LuwanDB
-from ..messages import Messages
+from ..infra import LuwanConfig, LuwanDB, Messages
 
 
 class TitleHandler:

@@ -7,7 +7,7 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
     AiocqhttpMessageEvent,
 )
 
-from ..messages import Messages
+from ..infra import Messages
 
 
 class HelpHandler:

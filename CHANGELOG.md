@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.6.0] - 2025-03-19
+
+### Changed
+
+- refactor(infra): 将 config.py, database.py, messages.py 移动到 infra/ 包下
+- refactor(infra): 重命名为 infra_config.py, infra_database.py, infra_messages.py
+- refactor(infra): 更新所有导入语句适配新的文件路径
+
 ## [v1.5.9] - 2025-03-19
 
 ### Changed

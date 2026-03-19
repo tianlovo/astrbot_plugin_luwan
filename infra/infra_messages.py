@@ -26,7 +26,7 @@ class Messages:
 
     def _load_messages(self) -> None:
         """从 JSON 文件加载消息"""
-        messages_path = Path(__file__).parent / "messages.json"
+        messages_path = Path(__file__).parent.parent / "messages.json"
         try:
             with open(messages_path, encoding="utf-8") as f:
                 self._messages = json.load(f)

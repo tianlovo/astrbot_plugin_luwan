@@ -9,8 +9,7 @@ from pathlib import Path
 
 from astrbot.api import logger
 
-from ..config import LuwanConfig
-from ..database import LuwanDB
+from ..infra import LuwanConfig, LuwanDB
 from .srv_comupik_client import ComuPikClient, ImageInfo
 
 

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.7.1] - 2025-03-19
+
+### Added
+
+- feat(poke): 添加反戳功能（被戳时戳回去）
+- feat(poke): 添加跟戳功能（其他人被戳时随机跟戳）
+
 ## [v1.7.0] - 2025-03-19
 
 ### Fixed

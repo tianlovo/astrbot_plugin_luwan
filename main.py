@@ -20,7 +20,7 @@ from .service import GroupCheckinService, ImageForwarder
     "astrbot_plugin_luwan",
     "Luwan",
     "AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能",
-    "1.6.1",
+    "1.6.2",
 )
 class LuwanPlugin(Star):
     """鹿丸插件主类
@@ -318,6 +318,38 @@ class LuwanPlugin(Star):
             await event.send(
                 event.plain_result(Messages.get("checkin.error.get_status_failed"))
             )
+
+    # ==================== 测试指令 ====================
+
+    @filter.command("测试")
+    @filter.event_message_type(EventMessageType.GROUP_MESSAGE)
+    async def handle_test(self, event: AiocqhttpMessageEvent) -> None:
+        """测试命令（仅超级管理员可用）"""
+        user_id = event.get_sender_id()
+
+        if not self.cfg.is_admin(user_id):
+            await event.send(event.plain_result("❌ 仅超级管理员可使用此命令"))
+            return
+
+        message_str = event.message_str.strip()
+
+        if "分享" in message_str:
+            await self._test_share(event)
+        else:
+            await event.send(event.plain_result("可用子命令：分享"))
+
+    async def _test_share(self, event: AiocqhttpMessageEvent) -> None:
+        """测试分享功能"""
+        import astrbot.api.message_components as Comp
+
+        url = "https://www.bilibili.com/video/BV1FAcfzJE3Q"
+        title = "桑多涅 Jeb Nid Nid 【原神MMD】"
+        content = "测试分享内容"
+
+        chain = Comp.MessageChain().append(
+            Comp.Share(url=url, title=title, content=content, image=None)
+        )
+        await event.send(chain)
 
     # ==================== Bot实例捕获 ====================
 

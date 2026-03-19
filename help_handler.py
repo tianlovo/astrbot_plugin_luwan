@@ -49,21 +49,9 @@ class HelpHandler:
 
 ⚠️ 限制：间隔 {min_interval} 分钟，每日 {daily_limit} 次
 
-⚙️ 管理指令
+⚙️ 管理说明
 ━━━━━━━━━━━━━━
-• 鹿丸配置
-  查看当前配置
-
-• 鹿丸配置 <项> <值>
-  修改配置
-  示例：鹿丸配置 forward_target_qq 123456
-
-• 清空限制 [QQ号]
-  别名：重置限制、清除限制
-  清空申请频率限制
-  示例：
-    清空限制（清空所有）
-    清空限制 123456（清空指定用户）
+配置管理请使用 AstrBot WebUI
 """
 
     def __init__(self, min_interval: int = 5, daily_limit: int = 3):

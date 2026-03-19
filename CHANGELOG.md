@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.4.0] - 2025-03-19
+
+### Removed
+
+- **BREAKING**: 移除QQ聊天交互式配置功能
+- 移除 `鹿丸配置` / `lw配置` 指令
+- 移除 `清空限制` / `重置限制` / `清除限制` 指令
+- 配置管理统一使用 AstrBot WebUI
+
+### Migration
+
+- 管理员请通过 AstrBot 管理面板进行配置
+- WebUI 路径：插件配置 → 鹿丸插件
+
 ## [v1.3.9] - 2025-03-15
 
 ### Fixed

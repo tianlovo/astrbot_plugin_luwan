@@ -204,7 +204,9 @@ class TitleHandler:
         except Exception as e:
             logger.error(f"[LuwanPlugin] 转发申请失败: {e}")
 
-    async def handle_change_title(self, event: AiocqhttpMessageEvent, new_title: str) -> None:
+    async def handle_change_title(
+        self, event: AiocqhttpMessageEvent, new_title: str
+    ) -> None:
         """处理更换头衔
 
         Args:

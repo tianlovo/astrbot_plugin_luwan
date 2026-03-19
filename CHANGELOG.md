@@ -5,6 +5,58 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.5.4] - 2025-03-19
+
+### Changed
+
+- feat(group_checkin): 确保每个群每天的随机打卡时间点都不重复
+- feat(group_checkin): 添加 `_used_times` 字典记录每个群已使用过的打卡时间
+- feat(group_checkin): 生成新时间时自动排除已使用的时间点
+- feat(group_checkin): 当所有时间点都用完后清空历史重新开始
+
+## [v1.5.3] - 2025-03-19
+
+### Changed
+
+- refactor(group_checkin): 重新设计打卡逻辑
+- feat(group_checkin): 每个群每天在配置时间段内随机挑选一个时间点打卡一次
+- feat(group_checkin): 打卡成功后当天不再打卡
+- feat(group_checkin): 打卡失败可在时间段内重试3次
+- feat(group_checkin): 3次失败后发送私聊消息通知超级管理员
+- feat(group_checkin): 添加 `_generate_scheduled_times` 方法生成随机打卡时间
+- feat(group_checkin): 添加 `_try_checkin` 方法实现重试机制
+- feat(group_checkin): 添加 `_reschedule_checkin_time` 方法重新安排打卡时间
+- feat(group_checkin): 添加 `_notify_admin` 方法通知管理员
+
+## [v1.5.2] - 2025-03-19
+
+### Changed
+
+- fix(group_checkin): 修改打卡保底逻辑
+- fix(group_checkin): 当整个群一整天（从00:00到保底检查时间）都没有任何人（包括机器人和群成员）打卡时，才触发保底打卡
+- feat(group_checkin): 添加 `_check_group_has_any_checkin_today` 方法，通过API查询群打卡记录
+
+## [v1.5.1] - 2025-03-19
+
+### Changed
+
+- refactor(group_checkin): 将群打卡配置从每个群独立配置改为全局配置
+- refactor(config): `group_checkin.groups` 改为 `group_checkin.target_groups`（仅群号列表）
+- refactor(config): `start_time`、`end_time`、`desire` 改为全局配置，所有群统一使用
+
+### Configuration
+
+群打卡配置项（v1.5.1）：
+- `group_checkin.enabled`: 是否启用群打卡
+- `group_checkin.target_groups`: 打卡群号列表
+- `group_checkin.start_time`: 打卡开始时间（HH:MM）
+- `group_checkin.end_time`: 打卡结束时间（HH:MM）
+- `group_checkin.desire`: 打卡欲望（0-100%）
+- `group_checkin.check_interval`: 检查间隔（分钟）
+- `group_checkin.enable_guarantee`: 是否启用打卡保底
+- `group_checkin.guarantee_check_time`: 保底检查时间（HH:MM）
+- `group_checkin.guarantee_start_time`: 保底统计开始时间（HH:MM）
+
 ## [v1.5.0] - 2025-03-19
 
 ### Added
@@ -17,13 +69,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 - feat(group_checkin): 每日自动重置，避免重复打卡
 - feat(config): 添加群打卡配置项到 WebUI
 - feat(database): 添加群打卡记录表
-
-### Configuration
-
-群打卡配置项：
-- `group_checkin.enabled`: 是否启用群打卡
-- `group_checkin.groups`: 打卡群列表（群号、时间段、欲望、消息）
-- `group_checkin.check_interval`: 检查间隔（分钟）
 
 ## [v1.4.0] - 2025-03-19
 

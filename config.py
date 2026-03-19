@@ -142,19 +142,29 @@ class LuwanConfig:
         return group_checkin.get("enabled", False)
 
     @property
-    def group_checkin_groups(self) -> list[dict]:
-        """群打卡列表配置
-
-        Returns:
-            群配置列表，每个配置包含:
-            - group_id: 群号
-            - start_time: 开始时间 (HH:MM)
-            - end_time: 结束时间 (HH:MM)
-            - desire: 打卡欲望 (0-100)
-            - messages: 打卡消息列表
-        """
+    def group_checkin_target_groups(self) -> list[str]:
+        """群打卡目标QQ群列表"""
         group_checkin = self.get("group_checkin", {})
-        return group_checkin.get("groups", [])
+        groups = group_checkin.get("target_groups", [])
+        return self._clean_ids(groups)
+
+    @property
+    def group_checkin_start_time(self) -> str:
+        """群打卡开始时间（HH:MM）"""
+        group_checkin = self.get("group_checkin", {})
+        return group_checkin.get("start_time", "09:00")
+
+    @property
+    def group_checkin_end_time(self) -> str:
+        """群打卡结束时间（HH:MM）"""
+        group_checkin = self.get("group_checkin", {})
+        return group_checkin.get("end_time", "23:00")
+
+    @property
+    def group_checkin_desire(self) -> int:
+        """群打卡欲望（0-100）"""
+        group_checkin = self.get("group_checkin", {})
+        return group_checkin.get("desire", 50)
 
     @property
     def group_checkin_interval(self) -> int:

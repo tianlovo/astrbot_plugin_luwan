@@ -109,44 +109,37 @@
         "type": "bool",
         "default": false
       },
-      "groups": {
+      "target_groups": {
         "description": "打卡群列表",
-        "hint": "配置要打卡的QQ群，每个群可设置时间段和概率",
+        "hint": "配置要打卡的QQ群号列表",
         "type": "list",
         "default": [],
         "items": {
-          "type": "object",
-          "properties": {
-            "group_id": {
-              "description": "QQ群号",
-              "hint": "要打卡的QQ群号",
-              "type": "string"
-            },
-            "start_time": {
-              "description": "开始时间",
-              "hint": "打卡时间段开始时间，格式 HH:MM",
-              "type": "string",
-              "default": "09:00"
-            },
-            "end_time": {
-              "description": "结束时间",
-              "hint": "打卡时间段结束时间，格式 HH:MM",
-              "type": "string",
-              "default": "23:00"
-            },
-            "desire": {
-              "description": "打卡欲望",
-              "hint": "打卡概率，0-100%",
-              "type": "int",
-              "slider": {
-                "min": 0,
-                "max": 100,
-                "step": 1
-              },
-              "default": 50
-            }
-          }
+          "type": "string"
         }
+      },
+      "start_time": {
+        "description": "开始时间",
+        "hint": "打卡时间段开始时间，格式 HH:MM",
+        "type": "string",
+        "default": "09:00"
+      },
+      "end_time": {
+        "description": "结束时间",
+        "hint": "打卡时间段结束时间，格式 HH:MM",
+        "type": "string",
+        "default": "23:00"
+      },
+      "desire": {
+        "description": "打卡欲望",
+        "hint": "打卡概率，0-100%",
+        "type": "int",
+        "slider": {
+          "min": 0,
+          "max": 100,
+          "step": 1
+        },
+        "default": 50
       },
       "check_interval": {
         "description": "检查间隔（分钟）",

@@ -64,7 +64,7 @@ class TestHandler:
 
             json_data = result.get("data", {})
             chain = Comp.MessageChain().append(Comp.Json(data=json_data))
-            await event.send(chain)
+            await event.send(event.chain_result(chain))
             logger.info("[LuwanPlugin] Bilibili小程序卡片已发送")
         except Exception as e:
             logger.error(f"[LuwanPlugin] 获取小程序卡片失败: {e}")

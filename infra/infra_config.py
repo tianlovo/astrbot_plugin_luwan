@@ -292,17 +292,20 @@ class LuwanConfig:
     @property
     def mute_duration(self) -> int:
         """禁言时长（分钟）"""
-        return self.get("mute_duration", 1)
+        mute = self.get("mute", {})
+        return mute.get("duration", 1)
 
     @property
     def mute_enabled(self) -> bool:
         """是否启用禁言我功能"""
-        return self.get("mute_enabled", False)
+        mute = self.get("mute", {})
+        return mute.get("enabled", False)
 
     @property
     def mute_enabled_groups(self) -> list[str]:
         """禁言我启用群列表"""
-        groups = self.get("mute_enabled_groups", [])
+        mute = self.get("mute", {})
+        groups = mute.get("enabled_groups", [])
         return self._clean_ids(groups)
 
     def is_admin(self, user_id: str) -> bool:

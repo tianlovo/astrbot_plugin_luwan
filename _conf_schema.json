@@ -261,24 +261,31 @@
             }
         }
     },
-    "mute_duration": {
-        "description": "禁言时长（分钟）",
-        "hint": "用户发送\"禁言我\"命令时被禁言的时长",
-        "type": "int",
-        "slider": {"min": 1, "max": 60, "step": 1},
-        "default": 1
-    },
-    "mute_enabled": {
-        "description": "启用禁言我",
-        "hint": "是否启用\"禁言我\"功能",
-        "type": "bool",
-        "default": false
-    },
-    "mute_enabled_groups": {
-        "description": "启用群列表",
-        "hint": "配置启用\"禁言我\"功能的QQ群号列表",
-        "type": "list",
-        "default": [],
-        "items": {"type": "string"}
+    "mute": {
+        "description": "禁言我配置",
+        "hint": "配置禁言我功能的启用状态和参数",
+        "type": "object",
+        "items": {
+            "enabled": {
+                "description": "启用禁言我",
+                "hint": "是否启用\"禁言我\"功能",
+                "type": "bool",
+                "default": false
+            },
+            "enabled_groups": {
+                "description": "启用群列表",
+                "hint": "配置启用\"禁言我\"功能的QQ群号列表",
+                "type": "list",
+                "default": [],
+                "items": {"type": "string"}
+            },
+            "duration": {
+                "description": "禁言时长（分钟）",
+                "hint": "用户发送\"禁言我\"命令时被禁言的时长",
+                "type": "int",
+                "slider": {"min": 1, "max": 60, "step": 1},
+                "default": 1
+            }
+        }
     }
 }

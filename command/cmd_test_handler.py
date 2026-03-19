@@ -156,7 +156,7 @@ class TestHandler:
                     )
                 ]
 
-                await event.send(event.chain_result(chain))
+                await self.context.send_message(event.unified_msg_origin, chain)
                 logger.info(f"[LuwanPlugin] 已分析群 {group_id} 的消息")
         except Exception as e:
             logger.error(f"[LuwanPlugin] 分析消息失败: {e}")

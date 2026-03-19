@@ -34,7 +34,8 @@ class Messages:
             print(f"[Messages] 加载消息文件失败: {e}")
             self._messages = {}
 
-    def get(self, key: str, default: str = "", **kwargs) -> str:
+    @classmethod
+    def get(cls, key: str, default: str = "", **kwargs) -> str:
         """获取消息
 
         Args:
@@ -51,8 +52,10 @@ class Messages:
             >>> Messages.get("title.apply.success", action="申请", title="小可爱")
             '\\n✅ 已申请头衔「小可爱」\\n📢 已通知群主处理，请耐心等待'
         """
+        if cls._instance is None:
+            cls()
         keys = key.split(".")
-        value = self._messages
+        value = cls._instance._messages
 
         for k in keys:
             if isinstance(value, dict) and k in value:

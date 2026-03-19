@@ -128,25 +128,31 @@ class TestHandler:
             analysis_parts = []
 
             for segment in message_chain:
-                if hasattr(segment, "type"):
-                    if segment.type == "json":
-                        json_data = getattr(segment, "data", {})
-                        if isinstance(json_data, str):
-                            try:
-                                json_data = json.loads(json_data)
-                            except Exception:
-                                pass
-                        analysis_parts.append(
-                            f"📦 JSON:\n{json.dumps(json_data, ensure_ascii=False, indent=2)}"
-                        )
-                    elif segment.type == "image":
-                        analysis_parts.append(
-                            f"🖼️ 图片: {getattr(segment, 'url', 'N/A')}"
-                        )
-                    elif segment.type == "text":
-                        analysis_parts.append(f"📝 文本: {segment.data}")
-                    else:
-                        analysis_parts.append(f"🔧 {segment.type}: {segment.data}")
+                segment_type = getattr(segment, "type", None)
+                if segment_type == "json":
+                    json_data = getattr(segment, "data", {})
+                    if isinstance(json_data, str):
+                        try:
+                            json_data = json.loads(json_data)
+                        except Exception:
+                            pass
+                    analysis_parts.append(
+                        f"📦 JSON:\n{json.dumps(json_data, ensure_ascii=False, indent=2)}"
+                    )
+                elif segment_type == "image":
+                    url = getattr(segment, "url", "N/A")
+                    analysis_parts.append(f"🖼️ 图片: {url}")
+                elif segment_type == "text":
+                    text = getattr(segment, "text", "")
+                    analysis_parts.append(f"📝 文本: {text}")
+                elif segment_type == "at":
+                    qq = getattr(segment, "qq", "N/A")
+                    analysis_parts.append(f"@ 成员: {qq}")
+                elif segment_type == "reply":
+                    msg_str = getattr(segment, "message_str", "N/A")
+                    analysis_parts.append(f"回复: {msg_str}")
+                elif segment_type:
+                    analysis_parts.append(f"🔧 {segment_type}")
 
             if analysis_parts:
                 analysis_text = "\n\n".join(analysis_parts)

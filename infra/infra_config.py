@@ -259,6 +259,36 @@ class LuwanConfig:
         poke = self.get("poke", {})
         return poke.get("cooldown_hours", 1.0)
 
+    @property
+    def poke_antipoke_enabled(self) -> bool:
+        """是否启用反戳功能（被戳时戳回去）"""
+        poke = self.get("poke", {})
+        return poke.get("antipoke_enabled", False)
+
+    @property
+    def poke_antipoke_prob(self) -> float:
+        """反戳概率"""
+        poke = self.get("poke", {})
+        return poke.get("antipoke_prob", 1.0)
+
+    @property
+    def poke_antipoke_max_times(self) -> int:
+        """反戳最大次数"""
+        poke = self.get("poke", {})
+        return poke.get("antipoke_max_times", 1)
+
+    @property
+    def poke_follow_enabled(self) -> bool:
+        """是否启用跟戳功能（其他人被戳时随机跟戳）"""
+        poke = self.get("poke", {})
+        return poke.get("follow_enabled", False)
+
+    @property
+    def poke_follow_prob(self) -> float:
+        """跟戳概率"""
+        poke = self.get("poke", {})
+        return poke.get("follow_prob", 0.3)
+
     def is_admin(self, user_id: str) -> bool:
         """检查用户是否为管理员
 

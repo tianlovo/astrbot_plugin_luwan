@@ -378,6 +378,15 @@ class LuwanPlugin(Star):
                     await self.poke_service.on_group_message(
                         group_id, user_id, message_text
                     )
+
+                msg = getattr(event, "message_obj", None)
+                raw = getattr(msg, "raw_message", None) if msg else None
+                if isinstance(raw, dict) and raw.get("post_type") == "notice":
+                    if (
+                        raw.get("notice_type") == "notify"
+                        and raw.get("sub_type") == "poke"
+                    ):
+                        await self.poke_service.handle_poke_event(event)
         except Exception as e:
             logger.debug(f"[LuwanPlugin] 捕获Bot实例失败: {e}")
 

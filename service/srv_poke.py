@@ -227,3 +227,100 @@ class PokeService:
         should_poke = await self.should_poke(group_id, user_id, message_text)
         if should_poke:
             await self.do_poke(group_id, user_id)
+
+    async def handle_poke_event(self, event) -> None:
+        """处理戳一戳事件（被动响应）
+
+        Args:
+            event: 戳一戳事件对象
+        """
+        try:
+            if not self._bot_instance:
+                logger.warning("[PokeService] Bot实例未设置，无法响应戳一戳")
+                return
+
+            msg = getattr(event, "message_obj", None)
+            raw = getattr(msg, "raw_message", None) if msg else None
+            if not isinstance(raw, dict):
+                return
+
+            if raw.get("post_type") != "notice":
+                return
+            if raw.get("notice_type") != "notify":
+                return
+            if raw.get("sub_type") != "poke":
+                return
+
+            self_id = raw.get("self_id", 0)
+            user_id = raw.get("user_id", 0)
+            target_id = raw.get("target_id", 0)
+            group_id = raw.get("group_id")
+
+            if user_id == self_id:
+                logger.debug("[PokeService] 忽略自己发送的戳一戳")
+                return
+
+            if target_id == self_id:
+                if self.cfg.poke_antipoke_enabled:
+                    await self._do_antipoke(user_id, group_id)
+            else:
+                if self.cfg.poke_follow_enabled:
+                    await self._do_follow_poke(target_id, group_id)
+
+        except Exception as e:
+            logger.error(f"[PokeService] 处理戳一戳事件失败: {e}")
+
+    async def _do_antipoke(self, user_id: int, group_id: int | None) -> None:
+        """执行反戳
+
+        Args:
+            user_id: 戳机器人的人的用户ID
+            group_id: 群ID（如果有）
+        """
+        if not self.cfg.poke_antipoke_enabled:
+            return
+
+        if random.random() > self.cfg.poke_antipoke_prob:
+            logger.debug("[PokeService] 反戳概率未命中，跳过")
+            return
+
+        max_times = self.cfg.poke_antipoke_max_times
+        for _ in range(max_times):
+            try:
+                if group_id:
+                    await self._bot_instance.group_poke(
+                        group_id=int(group_id),
+                        user_id=int(user_id),
+                    )
+                else:
+                    await self._bot_instance.friend_poke(user_id=int(user_id))
+                logger.info(f"[PokeService] 反戳用户 {user_id} 在群 {group_id}")
+            except Exception as e:
+                logger.error(f"[PokeService] 反戳失败: {e}")
+                break
+
+    async def _do_follow_poke(self, target_id: int, group_id: int | None) -> None:
+        """执行跟戳
+
+        Args:
+            target_id: 被戳的目标用户ID
+            group_id: 群ID（如果有）
+        """
+        if not self.cfg.poke_follow_enabled:
+            return
+
+        if random.random() > self.cfg.poke_follow_prob:
+            logger.debug("[PokeService] 跟戳概率未命中，跳过")
+            return
+
+        try:
+            if group_id:
+                await self._bot_instance.group_poke(
+                    group_id=int(group_id),
+                    user_id=int(target_id),
+                )
+            else:
+                await self._bot_instance.friend_poke(user_id=int(target_id))
+            logger.info(f"[PokeService] 跟戳用户 {target_id} 在群 {group_id}")
+        except Exception as e:
+            logger.error(f"[PokeService] 跟戳失败: {e}")

@@ -225,6 +225,39 @@
                 "type": "float",
                 "slider": {"min": 0.5, "max": 6, "step": 0.5},
                 "default": 1.0
+            },
+            "antipoke_enabled": {
+                "description": "启用反戳",
+                "hint": "被戳时自动戳回去",
+                "type": "bool",
+                "default": false
+            },
+            "antipoke_prob": {
+                "description": "反戳概率",
+                "hint": "被戳时戳回去的概率",
+                "type": "float",
+                "slider": {"min": 0, "max": 1, "step": 0.1},
+                "default": 1.0
+            },
+            "antipoke_max_times": {
+                "description": "反戳最大次数",
+                "hint": "每次反戳最多戳几下",
+                "type": "int",
+                "slider": {"min": 1, "max": 5, "step": 1},
+                "default": 1
+            },
+            "follow_enabled": {
+                "description": "启用跟戳",
+                "hint": "群内其他人被戳时随机跟戳",
+                "type": "bool",
+                "default": false
+            },
+            "follow_prob": {
+                "description": "跟戳概率",
+                "hint": "其他人被戳时跟戳的概率",
+                "type": "float",
+                "slider": {"min": 0, "max": 1, "step": 0.1},
+                "default": 0.3
             }
         }
     }

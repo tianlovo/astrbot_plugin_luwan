@@ -334,6 +334,45 @@ class LuwanPlugin(Star):
         else:
             await event.send(event.plain_result("❌ 测试功能未初始化"))
 
+    # ==================== 禁言我指令 ====================
+
+    @filter.command("禁言我", alias={"把我禁言"})
+    @filter.event_message_type(EventMessageType.GROUP_MESSAGE)
+    async def handle_mute_me(self, event: AiocqhttpMessageEvent) -> None:
+        """禁言我命令
+
+        指令: 禁言我 / 把我禁言
+        功能: 让机器人将发送者禁言指定时长
+        """
+        try:
+            user_id = event.get_sender_id()
+            group_id = event.get_group_id()
+
+            if not group_id or not user_id:
+                return
+
+            if not self.cfg.mute_enabled:
+                return
+
+            if group_id not in self.cfg.mute_enabled_groups:
+                return
+
+            duration_minutes = self.cfg.mute_duration
+            duration_seconds = duration_minutes * 60
+
+            await event.bot.set_group_ban(
+                group_id=int(group_id),
+                user_id=int(user_id),
+                duration=duration_seconds,
+            )
+
+            logger.info(
+                f"[LuwanPlugin] 用户 {user_id} 在群 {group_id} 自愿被禁言 {duration_minutes} 分钟"
+            )
+
+        except Exception as e:
+            logger.warning(f"[LuwanPlugin] 禁言失败: {e}")
+
     # ==================== Bot实例捕获 ====================
 
     @filter.event_message_type(EventMessageType.ALL)

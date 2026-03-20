@@ -29,6 +29,7 @@ class MuteVoteSession:
     duration: int
     good_voters: set[str] = field(default_factory=set)
     bad_voters: set[str] = field(default_factory=set)
+    all_voters: set[str] = field(default_factory=set)
     cancelled: bool = False
     bot = None
 
@@ -219,6 +220,11 @@ class MuteHandler:
 
             if voter_id == session.target_user_id:
                 return
+
+            if voter_id in session.all_voters:
+                return
+
+            session.all_voters.add(voter_id)
 
             if is_good:
                 session.good_voters.add(voter_id)

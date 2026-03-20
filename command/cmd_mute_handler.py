@@ -148,9 +148,11 @@ class MuteHandler:
                     logger.info(f"[LuwanPlugin] 用户 {initiator_id} 已有进行中的投票")
                     return
 
+            initiator_name = event.get_sender_name() or initiator_id
+
             vote_message = (
-                f"「{target_name}」被发起禁言投票，是否同意？\n"
-                "发送「好」同意，发送「不好」反对"
+                f"群友「{initiator_name}」发起禁言投票，是否禁言「{target_name}」？\n"
+                f"投票时长 {self.config.mute_vote_duration} 秒，发送「好」或「不好」投票"
             )
 
             vote_msg_obj = await event.bot.send_group_msg(

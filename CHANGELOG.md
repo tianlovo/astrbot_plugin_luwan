@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.7.4] - 2025-03-19
+
+### Fixed
+
+- fix(mute): 防止同一用户重复投票
+
+### Added
+
+- feat(mute): 添加禁言投票子命令（禁言 @用户 / 好 / 不好）
+
 ## [v1.7.3] - 2025-03-19
 
 ### Added

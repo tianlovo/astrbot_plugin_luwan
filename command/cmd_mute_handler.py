@@ -251,23 +251,23 @@ class MuteHandler:
         """
         try:
             if not group_id or not voter_id:
-                logger.debug(
+                logger.info(
                     f"[MuteHandler] 投票响应参数无效 | 群:{group_id} | 用户:{voter_id}"
                 )
                 return
 
             if not self.config.mute_enabled:
-                logger.debug("[MuteHandler] 禁言功能未启用")
+                logger.info("[MuteHandler] 禁言功能未启用")
                 return
 
             if group_id not in self.config.mute_enabled_groups:
-                logger.debug(f"[MuteHandler] 群 {group_id} 不在启用列表中")
+                logger.info(f"[MuteHandler] 群 {group_id} 不在启用列表中")
                 return
 
             current_time = time.time()
             vote_key = None
             for key, session in self._vote_sessions.items():
-                logger.debug(
+                logger.info(
                     f"[MuteHandler] 检查会话 | key:{key} | 群:{session.group_id} | 取消:{session.cancelled} | 剩余时间:{session.duration - (current_time - session.start_time):.1f}s"
                 )
                 if (
@@ -279,24 +279,24 @@ class MuteHandler:
                     break
 
             if not vote_key:
-                logger.debug(f"[MuteHandler] 未找到有效的投票会话 | 群:{group_id}")
+                logger.info(f"[MuteHandler] 未找到有效的投票会话 | 群:{group_id}")
                 return
 
             session = self._vote_sessions[vote_key]
-            logger.debug(
+            logger.info(
                 f"[MuteHandler] 找到投票会话 | key:{vote_key} | 目标:{session.target_user_id}"
             )
 
             if voter_id == session.initiator_user_id:
-                logger.debug(f"[MuteHandler] 发起人不能投票 | 用户:{voter_id}")
+                logger.info(f"[MuteHandler] 发起人不能投票 | 用户:{voter_id}")
                 return
 
             if voter_id == session.target_user_id:
-                logger.debug(f"[MuteHandler] 目标用户不能投票 | 用户:{voter_id}")
+                logger.info(f"[MuteHandler] 目标用户不能投票 | 用户:{voter_id}")
                 return
 
             if voter_id in session.all_voters:
-                logger.debug(f"[MuteHandler] 用户已投票 | 用户:{voter_id}")
+                logger.info(f"[MuteHandler] 用户已投票 | 用户:{voter_id}")
                 return
 
             session.all_voters.add(voter_id)

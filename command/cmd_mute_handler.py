@@ -1,9 +1,15 @@
 """禁言我处理模块
 
-处理"禁言我"命令，将用户禁言指定时长
+处理"禁言我"和禁言投票命令
 """
 
+import asyncio
+import time
+from dataclasses import dataclass, field
+
 from astrbot.api import logger
+from astrbot.api.event import MessageChain
+from astrbot.api.message_components import At, Plain
 from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
     AiocqhttpMessageEvent,
 )
@@ -11,10 +17,26 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
 from ..infra import LuwanConfig
 
 
+@dataclass
+class MuteVoteSession:
+    """禁言投票会话"""
+
+    group_id: str
+    target_user_id: str
+    initiator_user_id: str
+    message_id: int
+    start_time: float
+    duration: int
+    good_voters: set[str] = field(default_factory=set)
+    bad_voters: set[str] = field(default_factory=set)
+    cancelled: bool = False
+    bot = None
+
+
 class MuteHandler:
     """禁言我处理器
 
-    处理用户自愿被禁言的请求
+    处理用户自愿被禁言的请求和禁言投票功能
     """
 
     def __init__(self, config: LuwanConfig):
@@ -24,6 +46,11 @@ class MuteHandler:
             config: 插件配置对象
         """
         self.config = config
+        self._vote_sessions: dict[str, MuteVoteSession] = {}
+        self._target_cooldown: dict[str, float] = {}
+
+    def _get_vote_key(self, group_id: str, message_id: int) -> str:
+        return f"{group_id}:{message_id}"
 
     async def handle_mute_me(self, event: AiocqhttpMessageEvent) -> None:
         """处理禁言我命令
@@ -59,3 +86,193 @@ class MuteHandler:
 
         except Exception as e:
             logger.warning(f"[LuwanPlugin] 禁言失败: {e}")
+
+    async def handle_mute_request(self, event: AiocqhttpMessageEvent) -> None:
+        """处理禁言投票请求
+
+        命令格式: 禁言 @用户
+        机器人 At 目标用户并发起投票
+
+        Args:
+            event: 消息事件对象
+        """
+        try:
+            initiator_id = event.get_sender_id()
+            group_id = event.get_group_id()
+
+            if not group_id or not initiator_id:
+                return
+
+            if not self.config.mute_enabled:
+                return
+
+            if group_id not in self.config.mute_enabled_groups:
+                return
+
+            messages = event.get_messages()
+            target_user_id: str | None = None
+            for comp in messages:
+                if isinstance(comp, At):
+                    target_user_id = comp.qq
+                    break
+
+            if not target_user_id:
+                return
+
+            if target_user_id == str(event.bot.self_id):
+                return
+
+            cooldown_key = f"{group_id}:{target_user_id}"
+            current_time = time.time()
+            if cooldown_key in self._target_cooldown:
+                last_mute_time = self._target_cooldown[cooldown_key]
+                if current_time - last_mute_time < self.config.mute_target_cooldown:
+                    logger.info(
+                        f"[LuwanPlugin] 目标用户 {target_user_id} 在冷却期内，拒绝禁言投票"
+                    )
+                    return
+
+            vote_key = f"{group_id}:{initiator_id}"
+            if vote_key in self._vote_sessions:
+                existing = self._vote_sessions[vote_key]
+                if current_time - existing.start_time < existing.duration:
+                    logger.info(f"[LuwanPlugin] 用户 {initiator_id} 已有进行中的投票")
+                    return
+
+            vote_message = (
+                f"群友 {initiator_id} 发起禁言投票，是否禁言 {target_user_id}？\n"
+                "发送「好」同意，发送「不好」反对"
+            )
+
+            chain = MessageChain()
+            chain.chain.append(At(qq=target_user_id))
+            chain.chain.append(Plain(text=f"\n{vote_message}"))
+
+            vote_msg_obj = await event.bot.send_group_msg(
+                group_id=int(group_id),
+                message=[
+                    {"type": "at", "data": {"qq": target_user_id}},
+                    {"type": "text", "data": {"text": f"\n{vote_message}"}},
+                ],
+            )
+
+            session = MuteVoteSession(
+                group_id=group_id,
+                target_user_id=target_user_id,
+                initiator_user_id=initiator_id,
+                message_id=vote_msg_obj.get("message_id", 0),
+                start_time=current_time,
+                duration=self.config.mute_vote_duration,
+                bot=event.bot,
+            )
+            self._vote_sessions[vote_key] = session
+
+            asyncio.create_task(self._wait_for_vote_result(vote_key))
+
+            logger.info(
+                f"[LuwanPlugin] 用户 {initiator_id} 在群 {group_id} 发起禁言投票，目标: {target_user_id}"
+            )
+
+        except Exception as e:
+            logger.warning(f"[LuwanPlugin] 禁言投票发起失败: {e}")
+
+    async def handle_vote_response(
+        self, event: AiocqhttpMessageEvent, is_good: bool
+    ) -> None:
+        """处理投票响应（好/不好）
+
+        Args:
+            event: 消息事件对象
+            is_good: True 表示"好"，False 表示"不好"
+        """
+        try:
+            voter_id = event.get_sender_id()
+            group_id = event.get_group_id()
+
+            if not group_id or not voter_id:
+                return
+
+            if not self.config.mute_enabled:
+                return
+
+            if group_id not in self.config.mute_enabled_groups:
+                return
+
+            current_time = time.time()
+            vote_key = None
+            for key, session in self._vote_sessions.items():
+                if (
+                    session.group_id == group_id
+                    and not session.cancelled
+                    and current_time - session.start_time < session.duration
+                ):
+                    vote_key = key
+                    break
+
+            if not vote_key:
+                return
+
+            session = self._vote_sessions[vote_key]
+
+            if voter_id == session.initiator_user_id:
+                return
+
+            if voter_id == session.target_user_id:
+                return
+
+            if is_good:
+                session.good_voters.add(voter_id)
+                logger.debug(f"[LuwanPlugin] 投票: 用户 {voter_id} 投了好")
+            else:
+                session.bad_voters.add(voter_id)
+                logger.debug(f"[LuwanPlugin] 投票: 用户 {voter_id} 投了不好")
+
+        except Exception as e:
+            logger.warning(f"[LuwanPlugin] 处理投票响应失败: {e}")
+
+    async def _wait_for_vote_result(self, vote_key: str) -> None:
+        """等待投票结果
+
+        Args:
+            vote_key: 投票会话键
+        """
+        await asyncio.sleep(self._vote_sessions[vote_key].duration)
+
+        session = self._vote_sessions.get(vote_key)
+        if not session or session.cancelled:
+            return
+
+        session.cancelled = True
+
+        good_count = len(session.good_voters)
+        bad_count = len(session.bad_voters)
+
+        logger.info(
+            f"[LuwanPlugin] 投票结束 | 群 {session.group_id} | 目标 {session.target_user_id} | "
+            f"好:{good_count} | 不好:{bad_count}"
+        )
+
+        if good_count > bad_count:
+            try:
+                duration_seconds = self.config.mute_duration * 60
+                await session.bot.set_group_ban(
+                    group_id=int(session.group_id),
+                    user_id=int(session.target_user_id),
+                    duration=duration_seconds,
+                )
+
+                cooldown_key = f"{session.group_id}:{session.target_user_id}"
+                self._target_cooldown[cooldown_key] = time.time()
+
+                logger.info(
+                    f"[LuwanPlugin] 投票通过，禁言用户 {session.target_user_id} 在群 {session.group_id}"
+                )
+            except Exception as e:
+                logger.warning(f"[LuwanPlugin] 执行禁言失败: {e}")
+        else:
+            logger.info(
+                f"[LuwanPlugin] 投票未通过，不执行禁言 | 好:{good_count} 不好:{bad_count}"
+            )
+
+        if vote_key in self._vote_sessions:
+            del self._vote_sessions[vote_key]

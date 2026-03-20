@@ -308,6 +308,18 @@ class LuwanConfig:
         groups = mute.get("enabled_groups", [])
         return self._clean_ids(groups)
 
+    @property
+    def mute_vote_duration(self) -> int:
+        """禁言投票时长（秒）"""
+        mute = self.get("mute", {})
+        return mute.get("vote_duration", 30)
+
+    @property
+    def mute_target_cooldown(self) -> int:
+        """被禁言用户冷却时间（秒）"""
+        mute = self.get("mute", {})
+        return mute.get("target_cooldown", 60)
+
     def is_admin(self, user_id: str) -> bool:
         """检查用户是否为管理员
 

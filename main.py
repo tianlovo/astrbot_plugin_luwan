@@ -20,7 +20,7 @@ from .service import GroupCheckinService, ImageForwarder, PokeService
     "astrbot_plugin_luwan",
     "Luwan",
     "AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能",
-    "1.7.6",
+    "1.7.7",
 )
 class LuwanPlugin(Star):
     """鹿丸插件主类
@@ -384,17 +384,18 @@ class LuwanPlugin(Star):
             ):
                 await self.test_handler.analyze_message(event)
 
-            if (
-                self.mute_handler
-                and event.get_platform_name() == "aiocqhttp"
-                and isinstance(event, AiocqhttpMessageEvent)
-            ):
+            # MuteHandler 消息处理 - 使用独立条件判断便于调试
+            is_aiocqhttp = event.get_platform_name() == "aiocqhttp"
+            is_right_type = isinstance(event, AiocqhttpMessageEvent)
+            has_handler = self.mute_handler is not None
+
+            if is_aiocqhttp and is_right_type and has_handler:
                 try:
                     group_id = event.get_group_id()
                     user_id = event.get_sender_id()
                     message_text = event.message_str
                     bot_self_id = str(event.bot.self_id) if event.bot else None
-                    logger.debug(
+                    logger.info(
                         f"[LuwanPlugin] MuteHandler收到消息 | 群:{group_id} | 用户:{user_id} | 内容:'{message_text}'"
                     )
                     if group_id and user_id:
@@ -405,6 +406,18 @@ class LuwanPlugin(Star):
                     logger.warning(
                         f"[LuwanPlugin] MuteHandler处理消息失败: {e}", exc_info=True
                     )
+            else:
+                # 记录为什么跳过处理，便于调试
+                if not is_aiocqhttp:
+                    logger.debug(
+                        f"[LuwanPlugin] MuteHandler跳过: 平台不是aiocqhttp, 而是{event.get_platform_name()}"
+                    )
+                elif not is_right_type:
+                    logger.debug(
+                        f"[LuwanPlugin] MuteHandler跳过: 事件类型不匹配, {type(event)}"
+                    )
+                elif not has_handler:
+                    logger.warning("[LuwanPlugin] MuteHandler跳过: handler为None")
 
             if (
                 self.poke_service

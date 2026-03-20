@@ -214,11 +214,11 @@ class MuteHandler:
 
             message_text = message_text.strip()
 
-            # 调试日志
-            logger.debug(
+            # 使用INFO级别确保日志可见
+            logger.info(
                 f"[MuteHandler] 收到消息 | 群:{group_id} | 用户:{user_id} | 内容:'{message_text}'"
             )
-            logger.debug(f"[MuteHandler] 当前投票会话数: {len(self._vote_sessions)}")
+            logger.info(f"[MuteHandler] 当前投票会话数: {len(self._vote_sessions)}")
 
             # 处理 @机器人 的情况，如 "@机器人昵称(123456) 好"
             # 移除 @xxx(xxx) 格式的文本
@@ -228,13 +228,13 @@ class MuteHandler:
             # 再清理一次普通 @ 格式
             cleaned_text = re.sub(r"\s*@\S+\s*", " ", cleaned_text).strip()
 
-            logger.debug(f"[MuteHandler] 清理后文本: '{cleaned_text}'")
+            logger.info(f"[MuteHandler] 清理后文本: '{cleaned_text}'")
 
             if cleaned_text == "好" or message_text == "好":
-                logger.debug(f"[MuteHandler] 检测到'好'投票 | 用户:{user_id}")
+                logger.info(f"[MuteHandler] 检测到'好'投票 | 用户:{user_id}")
                 await self.handle_vote_response_raw(group_id, user_id, is_good=True)
             elif cleaned_text == "不好" or message_text == "不好":
-                logger.debug(f"[MuteHandler] 检测到'不好'投票 | 用户:{user_id}")
+                logger.info(f"[MuteHandler] 检测到'不好'投票 | 用户:{user_id}")
                 await self.handle_vote_response_raw(group_id, user_id, is_good=False)
         except Exception as e:
             logger.warning(f"[LuwanPlugin] 处理投票消息失败: {e}", exc_info=True)

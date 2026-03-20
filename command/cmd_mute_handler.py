@@ -31,7 +31,7 @@ class MuteVoteSession:
     bad_voters: set[str] = field(default_factory=set)
     all_voters: set[str] = field(default_factory=set)
     cancelled: bool = False
-    bot = None
+    bot: None = field(default=None)
 
 
 class MuteHandler:

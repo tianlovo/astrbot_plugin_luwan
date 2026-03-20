@@ -8,8 +8,7 @@ import time
 from dataclasses import dataclass, field
 
 from astrbot.api import logger
-from astrbot.api.event import MessageChain
-from astrbot.api.message_components import At, Plain
+from astrbot.api.message_components import At
 from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
     AiocqhttpMessageEvent,
 )
@@ -123,6 +122,18 @@ class MuteHandler:
             if target_user_id == str(event.bot.self_id):
                 return
 
+            initiator_name = event.get_sender_name() or initiator_id
+
+            target_name = target_user_id
+            try:
+                member_info = await event.bot.get_group_member_info(
+                    group_id=int(group_id), user_id=int(target_user_id)
+                )
+                if member_info:
+                    target_name = member_info.get("card") or member_info.get("nickname") or target_user_id
+            except Exception:
+                pass
+
             cooldown_key = f"{group_id}:{target_user_id}"
             current_time = time.time()
             if cooldown_key in self._target_cooldown:
@@ -141,20 +152,13 @@ class MuteHandler:
                     return
 
             vote_message = (
-                f"群友 {initiator_id} 发起禁言投票，是否禁言 {target_user_id}？\n"
+                f"群友「{initiator_name}」发起禁言投票，是否禁言「{target_name}」？\n"
                 "发送「好」同意，发送「不好」反对"
             )
 
-            chain = MessageChain()
-            chain.chain.append(At(qq=target_user_id))
-            chain.chain.append(Plain(text=f"\n{vote_message}"))
-
             vote_msg_obj = await event.bot.send_group_msg(
                 group_id=int(group_id),
-                message=[
-                    {"type": "at", "data": {"qq": target_user_id}},
-                    {"type": "text", "data": {"text": f"\n{vote_message}"}},
-                ],
+                message=[{"type": "text", "data": {"text": vote_message}}],
             )
 
             session = MuteVoteSession(

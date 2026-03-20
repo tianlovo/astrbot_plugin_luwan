@@ -292,7 +292,10 @@ class MuteHandler:
         try:
             await session.bot.send_group_msg(
                 group_id=int(session.group_id),
-                message=[{"type": "text", "data": {"text": result_message}}],
+                message=[
+                    {"type": "reply", "data": {"id": session.message_id}},
+                    {"type": "text", "data": {"text": result_message}},
+                ],
             )
         except Exception as e:
             logger.warning(f"[LuwanPlugin] 发送投票结果失败: {e}")

@@ -182,6 +182,28 @@ class MuteHandler:
         except Exception as e:
             logger.warning(f"[LuwanPlugin] 禁言投票发起失败: {e}")
 
+    async def handle_vote_message(self, event: AiocqhttpMessageEvent) -> None:
+        """处理投票消息（监听所有消息）
+
+        当有进行中的投票时，检测"好"或"不好"消息并计入投票
+
+        Args:
+            event: 消息事件对象
+        """
+        try:
+            group_id = event.get_group_id()
+            if not group_id or group_id not in self.config.mute_enabled_groups:
+                return
+
+            message_text = event.get_message_str().strip()
+
+            if message_text == "好":
+                await self.handle_vote_response(event, is_good=True)
+            elif message_text == "不好":
+                await self.handle_vote_response(event, is_good=False)
+        except Exception as e:
+            logger.warning(f"[LuwanPlugin] 处理投票消息失败: {e}")
+
     async def handle_vote_response(
         self, event: AiocqhttpMessageEvent, is_good: bool
     ) -> None:

@@ -352,20 +352,6 @@ class LuwanPlugin(Star):
         if self.mute_handler:
             await self.mute_handler.handle_mute_request(event)
 
-    @filter.command("好")
-    @filter.event_message_type(EventMessageType.GROUP_MESSAGE)
-    async def handle_vote_good(self, event: AiocqhttpMessageEvent) -> None:
-        """投票同意"""
-        if self.mute_handler:
-            await self.mute_handler.handle_vote_response(event, is_good=True)
-
-    @filter.command("不好")
-    @filter.event_message_type(EventMessageType.GROUP_MESSAGE)
-    async def handle_vote_bad(self, event: AiocqhttpMessageEvent) -> None:
-        """投票反对"""
-        if self.mute_handler:
-            await self.mute_handler.handle_vote_response(event, is_good=False)
-
     # ==================== Bot实例捕获 ====================
 
     @filter.event_message_type(EventMessageType.ALL)
@@ -397,6 +383,13 @@ class LuwanPlugin(Star):
                 and isinstance(event, AiocqhttpMessageEvent)
             ):
                 await self.test_handler.analyze_message(event)
+
+            if (
+                self.mute_handler
+                and event.get_platform_name() == "aiocqhttp"
+                and isinstance(event, AiocqhttpMessageEvent)
+            ):
+                await self.mute_handler.handle_vote_message(event)
 
             if (
                 self.poke_service

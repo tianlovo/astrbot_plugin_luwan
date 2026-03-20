@@ -148,18 +148,13 @@ class MuteHandler:
                     logger.info(f"[LuwanPlugin] 用户 {initiator_id} 已有进行中的投票")
                     return
 
-            initiator_name = event.get_sender_name() or initiator_id
-
-            vote_message = (
-                f"各位觉得是否禁言「{target_name}」？\n"
-                f"群友「{initiator_name}」发起了投票，{self.config.mute_vote_duration}秒内发送「好」或「不好」来决定"
-            )
-
             vote_msg_obj = await event.bot.send_group_msg(
                 group_id=int(group_id),
                 message=[
+                    {"type": "at", "data": {"qq": int(initiator_id)}},
+                    {"type": "text", "data": {"text": " 发起了投票，各位是否要禁言 "}},
                     {"type": "at", "data": {"qq": int(target_user_id)}},
-                    {"type": "text", "data": {"text": f"\n{vote_message}"}},
+                    {"type": "text", "data": {"text": f"？\n{self.config.mute_vote_duration}秒内发送「好」或「不好」来参与投票吧~"}},
                 ],
             )
 

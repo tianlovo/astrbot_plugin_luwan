@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.7.5] - 2025-03-20
+
+### Fixed
+
+- fix(mute): 修复at获取逻辑，跳过机器人at获取目标用户
+- fix(mute): 投票通知不at且显示群昵称
+- fix(mute): 投票通知at目标用户并发送投票结果
+- fix(mute): 投票结果通知引用投票消息
+- fix(mute): 改用消息监听方式统计投票而非命令注册
+- fix(mute): 改用on_group_message方式收集投票消息
+
+### Added
+
+- feat(mute): 添加禁言投票子命令（禁言 @用户 / 好 / 不好）
+- feat(mute): 投票通知显示发起人和投票时长
+
 ## [v1.7.4] - 2025-03-19
 
 ### Fixed

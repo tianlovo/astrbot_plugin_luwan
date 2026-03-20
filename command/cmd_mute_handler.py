@@ -22,6 +22,7 @@ class MuteVoteSession:
 
     group_id: str
     target_user_id: str
+    target_name: str
     initiator_user_id: str
     message_id: int
     start_time: float
@@ -122,8 +123,6 @@ class MuteHandler:
             if target_user_id == str(event.bot.self_id):
                 return
 
-            initiator_name = event.get_sender_name() or initiator_id
-
             target_name = target_user_id
             try:
                 member_info = await event.bot.get_group_member_info(
@@ -152,18 +151,22 @@ class MuteHandler:
                     return
 
             vote_message = (
-                f"群友「{initiator_name}」发起禁言投票，是否禁言「{target_name}」？\n"
+                f"「{target_name}」被发起禁言投票，是否同意？\n"
                 "发送「好」同意，发送「不好」反对"
             )
 
             vote_msg_obj = await event.bot.send_group_msg(
                 group_id=int(group_id),
-                message=[{"type": "text", "data": {"text": vote_message}}],
+                message=[
+                    {"type": "at", "data": {"qq": target_user_id}},
+                    {"type": "text", "data": {"text": f"\n{vote_message}"}},
+                ],
             )
 
             session = MuteVoteSession(
                 group_id=group_id,
                 target_user_id=target_user_id,
+                target_name=target_name,
                 initiator_user_id=initiator_id,
                 message_id=vote_msg_obj.get("message_id", 0),
                 start_time=current_time,
@@ -277,12 +280,24 @@ class MuteHandler:
                 logger.info(
                     f"[LuwanPlugin] 投票通过，禁言用户 {session.target_user_id} 在群 {session.group_id}"
                 )
+
+                result_message = f"投票结束！同意票({good_count}) > 反对票({bad_count})，执行禁言「{session.target_name}」"
             except Exception as e:
                 logger.warning(f"[LuwanPlugin] 执行禁言失败: {e}")
+                result_message = f"投票结束！同意票({good_count}) > 反对票({bad_count})，但禁言执行失败"
         else:
             logger.info(
                 f"[LuwanPlugin] 投票未通过，不执行禁言 | 好:{good_count} 不好:{bad_count}"
             )
+            result_message = f"投票结束！同意票({good_count}) <= 反对票({bad_count})，不执行禁言"
+
+        try:
+            await session.bot.send_group_msg(
+                group_id=int(session.group_id),
+                message=[{"type": "text", "data": {"text": result_message}}],
+            )
+        except Exception as e:
+            logger.warning(f"[LuwanPlugin] 发送投票结果失败: {e}")
 
         if vote_key in self._vote_sessions:
             del self._vote_sessions[vote_key]

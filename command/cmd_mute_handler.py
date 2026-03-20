@@ -127,7 +127,11 @@ class MuteHandler:
                     group_id=int(group_id), user_id=int(target_user_id)
                 )
                 if member_info:
-                    target_name = member_info.get("card") or member_info.get("nickname") or target_user_id
+                    target_name = (
+                        member_info.get("card")
+                        or member_info.get("nickname")
+                        or target_user_id
+                    )
             except Exception:
                 pass
 
@@ -154,7 +158,12 @@ class MuteHandler:
                     {"type": "at", "data": {"qq": int(initiator_id)}},
                     {"type": "text", "data": {"text": " 发起了投票，各位是否要禁言 "}},
                     {"type": "at", "data": {"qq": int(target_user_id)}},
-                    {"type": "text", "data": {"text": f"？\n{self.config.mute_vote_duration}秒内发送「好」或「不好」来参与投票吧~"}},
+                    {
+                        "type": "text",
+                        "data": {
+                            "text": f"？\n{self.config.mute_vote_duration}秒内发送「好」或「不好」来参与投票吧~"
+                        },
+                    },
                 ],
             )
 
@@ -180,7 +189,11 @@ class MuteHandler:
             logger.warning(f"[LuwanPlugin] 禁言投票发起失败: {e}")
 
     async def on_group_message(
-        self, group_id: str, user_id: str, message_text: str, bot_self_id: str | None = None
+        self,
+        group_id: str,
+        user_id: str,
+        message_text: str,
+        bot_self_id: str | None = None,
     ) -> None:
         """处理群消息
 
@@ -201,12 +214,30 @@ class MuteHandler:
 
             message_text = message_text.strip()
 
-            if message_text == "好":
+            # 调试日志
+            logger.debug(
+                f"[MuteHandler] 收到消息 | 群:{group_id} | 用户:{user_id} | 内容:'{message_text}'"
+            )
+            logger.debug(f"[MuteHandler] 当前投票会话数: {len(self._vote_sessions)}")
+
+            # 处理 @机器人 的情况，如 "@机器人昵称(123456) 好"
+            # 移除 @xxx(xxx) 格式的文本
+            import re
+
+            cleaned_text = re.sub(r"\s*@\S+?\(\d+\)\s*", " ", message_text).strip()
+            # 再清理一次普通 @ 格式
+            cleaned_text = re.sub(r"\s*@\S+\s*", " ", cleaned_text).strip()
+
+            logger.debug(f"[MuteHandler] 清理后文本: '{cleaned_text}'")
+
+            if cleaned_text == "好" or message_text == "好":
+                logger.debug(f"[MuteHandler] 检测到'好'投票 | 用户:{user_id}")
                 await self.handle_vote_response_raw(group_id, user_id, is_good=True)
-            elif message_text == "不好":
+            elif cleaned_text == "不好" or message_text == "不好":
+                logger.debug(f"[MuteHandler] 检测到'不好'投票 | 用户:{user_id}")
                 await self.handle_vote_response_raw(group_id, user_id, is_good=False)
         except Exception as e:
-            logger.warning(f"[LuwanPlugin] 处理投票消息失败: {e}")
+            logger.warning(f"[LuwanPlugin] 处理投票消息失败: {e}", exc_info=True)
 
     async def handle_vote_response_raw(
         self, group_id: str, voter_id: str, is_good: bool
@@ -220,17 +251,25 @@ class MuteHandler:
         """
         try:
             if not group_id or not voter_id:
+                logger.debug(
+                    f"[MuteHandler] 投票响应参数无效 | 群:{group_id} | 用户:{voter_id}"
+                )
                 return
 
             if not self.config.mute_enabled:
+                logger.debug("[MuteHandler] 禁言功能未启用")
                 return
 
             if group_id not in self.config.mute_enabled_groups:
+                logger.debug(f"[MuteHandler] 群 {group_id} 不在启用列表中")
                 return
 
             current_time = time.time()
             vote_key = None
             for key, session in self._vote_sessions.items():
+                logger.debug(
+                    f"[MuteHandler] 检查会话 | key:{key} | 群:{session.group_id} | 取消:{session.cancelled} | 剩余时间:{session.duration - (current_time - session.start_time):.1f}s"
+                )
                 if (
                     session.group_id == group_id
                     and not session.cancelled
@@ -240,30 +279,41 @@ class MuteHandler:
                     break
 
             if not vote_key:
+                logger.debug(f"[MuteHandler] 未找到有效的投票会话 | 群:{group_id}")
                 return
 
             session = self._vote_sessions[vote_key]
+            logger.debug(
+                f"[MuteHandler] 找到投票会话 | key:{vote_key} | 目标:{session.target_user_id}"
+            )
 
             if voter_id == session.initiator_user_id:
+                logger.debug(f"[MuteHandler] 发起人不能投票 | 用户:{voter_id}")
                 return
 
             if voter_id == session.target_user_id:
+                logger.debug(f"[MuteHandler] 目标用户不能投票 | 用户:{voter_id}")
                 return
 
             if voter_id in session.all_voters:
+                logger.debug(f"[MuteHandler] 用户已投票 | 用户:{voter_id}")
                 return
 
             session.all_voters.add(voter_id)
 
             if is_good:
                 session.good_voters.add(voter_id)
-                logger.debug(f"[LuwanPlugin] 投票: 用户 {voter_id} 投了好")
+                logger.info(
+                    f"[MuteHandler] 投票记录: 用户 {voter_id} 投了好 | 当前好票数:{len(session.good_voters)}"
+                )
             else:
                 session.bad_voters.add(voter_id)
-                logger.debug(f"[LuwanPlugin] 投票: 用户 {voter_id} 投了不好")
+                logger.info(
+                    f"[MuteHandler] 投票记录: 用户 {voter_id} 投了不好 | 当前不好票数:{len(session.bad_voters)}"
+                )
 
         except Exception as e:
-            logger.warning(f"[LuwanPlugin] 处理投票响应失败: {e}")
+            logger.warning(f"[LuwanPlugin] 处理投票响应失败: {e}", exc_info=True)
 
     async def _wait_for_vote_result(self, vote_key: str) -> None:
         """等待投票结果
@@ -311,7 +361,9 @@ class MuteHandler:
             logger.info(
                 f"[LuwanPlugin] 投票未通过，不执行禁言 | 好:{good_count} 不好:{bad_count}"
             )
-            result_message = f"投票结束！同意票({good_count}) <= 反对票({bad_count})，不执行禁言"
+            result_message = (
+                f"投票结束！同意票({good_count}) <= 反对票({bad_count})，不执行禁言"
+            )
 
         try:
             await session.bot.send_group_msg(

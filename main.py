@@ -20,7 +20,7 @@ from .service import GroupCheckinService, ImageForwarder, PokeService
     "astrbot_plugin_luwan",
     "Luwan",
     "AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能",
-    "1.7.5",
+    "1.7.6",
 )
 class LuwanPlugin(Star):
     """鹿丸插件主类
@@ -389,13 +389,21 @@ class LuwanPlugin(Star):
                 and event.get_platform_name() == "aiocqhttp"
                 and isinstance(event, AiocqhttpMessageEvent)
             ):
-                group_id = event.get_group_id()
-                user_id = event.get_sender_id()
-                message_text = event.message_str
-                bot_self_id = str(event.bot.self_id) if event.bot else None
-                if group_id and user_id:
-                    await self.mute_handler.on_group_message(
-                        group_id, user_id, message_text, bot_self_id
+                try:
+                    group_id = event.get_group_id()
+                    user_id = event.get_sender_id()
+                    message_text = event.message_str
+                    bot_self_id = str(event.bot.self_id) if event.bot else None
+                    logger.debug(
+                        f"[LuwanPlugin] MuteHandler收到消息 | 群:{group_id} | 用户:{user_id} | 内容:'{message_text}'"
+                    )
+                    if group_id and user_id:
+                        await self.mute_handler.on_group_message(
+                            group_id, user_id, message_text, bot_self_id
+                        )
+                except Exception as e:
+                    logger.warning(
+                        f"[LuwanPlugin] MuteHandler处理消息失败: {e}", exc_info=True
                     )
 
             if (

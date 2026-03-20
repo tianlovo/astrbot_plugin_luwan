@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.7.6] - 2025-03-20
+
+### Fixed
+
+- fix(mute): 修复投票收集失败问题，支持处理@机器人的消息格式
+- fix(mute): 添加详细调试日志以便排查问题
+- fix(mute): 改进消息文本清理逻辑，兼容多种@格式
+
 ## [v1.7.5] - 2025-03-20
 
 ### Fixed

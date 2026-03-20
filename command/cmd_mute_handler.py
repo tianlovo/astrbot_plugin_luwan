@@ -151,8 +151,8 @@ class MuteHandler:
             initiator_name = event.get_sender_name() or initiator_id
 
             vote_message = (
-                f"群友「{initiator_name}」发起禁言投票，是否禁言「{target_name}」？\n"
-                f"投票时长 {self.config.mute_vote_duration} 秒，发送「好」或「不好」投票"
+                f"各位觉得是否禁言「{target_name}」？\n"
+                f"群友「{initiator_name}」发起了投票，{self.config.mute_vote_duration}秒内发送「好」或「不好」来决定"
             )
 
             vote_msg_obj = await event.bot.send_group_msg(

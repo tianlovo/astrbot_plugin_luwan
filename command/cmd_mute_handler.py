@@ -139,9 +139,15 @@ class MuteHandler:
             current_time = time.time()
             if cooldown_key in self._target_cooldown:
                 last_mute_time = self._target_cooldown[cooldown_key]
-                if current_time - last_mute_time < self.config.mute_target_cooldown:
+                elapsed = current_time - last_mute_time
+                if elapsed < self.config.mute_target_cooldown:
+                    remaining = int(self.config.mute_target_cooldown - elapsed)
                     logger.info(
                         f"[LuwanPlugin] 目标用户 {target_user_id} 在冷却期内，拒绝禁言投票"
+                    )
+                    await event.bot.send_group_msg(
+                        group_id=int(group_id),
+                        message=f"❌ 该用户正在禁言冷却中，请 {remaining} 秒后再试",
                     )
                     return
 

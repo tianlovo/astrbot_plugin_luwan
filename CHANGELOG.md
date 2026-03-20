@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.7.10] - 2025-03-20
+
+### Fixed
+
+- fix(mute): 确保投票群组隔离，一个群同时只能有一个投票
+
 ## [v1.7.9] - 2025-03-20
 
 ### Changed

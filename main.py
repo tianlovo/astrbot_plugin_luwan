@@ -20,7 +20,7 @@ from .service import GroupCheckinService, ImageForwarder, PokeService
     "astrbot_plugin_luwan",
     "Luwan",
     "AstrBot 群聊插件，提供帮助菜单、头衔申请与转发、管理配置等功能",
-    "1.7.9",
+    "1.7.10",
 )
 class LuwanPlugin(Star):
     """鹿丸插件主类

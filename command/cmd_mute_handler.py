@@ -145,12 +145,19 @@ class MuteHandler:
                     )
                     return
 
+            # 检查当前群是否已有进行中的投票（一个群同时只能有一个投票）
+            existing_vote_key = None
+            for key, session in self._vote_sessions.items():
+                if session.group_id == group_id and not session.cancelled:
+                    if current_time - session.start_time < session.duration:
+                        existing_vote_key = key
+                        break
+
+            if existing_vote_key:
+                logger.info(f"[LuwanPlugin] 群 {group_id} 已有进行中的投票")
+                return
+
             vote_key = f"{group_id}:{initiator_id}"
-            if vote_key in self._vote_sessions:
-                existing = self._vote_sessions[vote_key]
-                if current_time - existing.start_time < existing.duration:
-                    logger.info(f"[LuwanPlugin] 用户 {initiator_id} 已有进行中的投票")
-                    return
 
             vote_msg_obj = await event.bot.send_group_msg(
                 group_id=int(group_id),

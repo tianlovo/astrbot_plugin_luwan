@@ -111,14 +111,12 @@ class MuteHandler:
                 return
 
             messages = event.get_messages()
-            target_user_id: str | None = None
-            for comp in messages:
-                if isinstance(comp, At):
-                    target_user_id = comp.qq
-                    break
+            at_components = [comp for comp in messages if isinstance(comp, At)]
 
-            if not target_user_id:
+            if len(at_components) < 2:
                 return
+
+            target_user_id = str(at_components[1].qq)
 
             if target_user_id == str(event.bot.self_id):
                 return
@@ -158,7 +156,7 @@ class MuteHandler:
             vote_msg_obj = await event.bot.send_group_msg(
                 group_id=int(group_id),
                 message=[
-                    {"type": "at", "data": {"qq": target_user_id}},
+                    {"type": "at", "data": {"qq": int(target_user_id)}},
                     {"type": "text", "data": {"text": f"\n{vote_message}"}},
                 ],
             )

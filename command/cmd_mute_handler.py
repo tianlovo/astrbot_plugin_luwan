@@ -300,6 +300,10 @@ class MuteHandler:
                 f"[MuteHandler] 找到投票会话 | key:{vote_key} | 目标:{session.target_user_id}"
             )
 
+            if voter_id == session.initiator_user_id:
+                logger.info(f"[MuteHandler] 发起人不能投票 | 用户:{voter_id}")
+                return
+
             if voter_id in session.all_voters:
                 logger.info(f"[MuteHandler] 用户已投票 | 用户:{voter_id}")
                 return

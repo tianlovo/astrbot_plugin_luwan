@@ -389,7 +389,14 @@ class LuwanPlugin(Star):
                 and event.get_platform_name() == "aiocqhttp"
                 and isinstance(event, AiocqhttpMessageEvent)
             ):
-                await self.mute_handler.handle_vote_message(event)
+                group_id = event.get_group_id()
+                user_id = event.get_sender_id()
+                message_text = event.message_str
+                bot_self_id = str(event.bot.self_id) if event.bot else None
+                if group_id and user_id:
+                    await self.mute_handler.on_group_message(
+                        group_id, user_id, message_text, bot_self_id
+                    )
 
             if (
                 self.poke_service

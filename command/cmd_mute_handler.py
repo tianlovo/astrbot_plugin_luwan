@@ -184,41 +184,46 @@ class MuteHandler:
         except Exception as e:
             logger.warning(f"[LuwanPlugin] 禁言投票发起失败: {e}")
 
-    async def handle_vote_message(self, event: AiocqhttpMessageEvent) -> None:
-        """处理投票消息（监听所有消息）
+    async def on_group_message(
+        self, group_id: str, user_id: str, message_text: str, bot_self_id: str | None = None
+    ) -> None:
+        """处理群消息
 
         当有进行中的投票时，检测"好"或"不好"消息并计入投票
 
         Args:
-            event: 消息事件对象
+            group_id: 群号
+            user_id: 用户ID
+            message_text: 消息文本
+            bot_self_id: 机器人自身ID
         """
         try:
-            group_id = event.get_group_id()
             if not group_id or group_id not in self.config.mute_enabled_groups:
                 return
 
-            message_text = event.get_message_str().strip()
+            if bot_self_id and user_id == bot_self_id:
+                return
+
+            message_text = message_text.strip()
 
             if message_text == "好":
-                await self.handle_vote_response(event, is_good=True)
+                await self.handle_vote_response_raw(group_id, user_id, is_good=True)
             elif message_text == "不好":
-                await self.handle_vote_response(event, is_good=False)
+                await self.handle_vote_response_raw(group_id, user_id, is_good=False)
         except Exception as e:
             logger.warning(f"[LuwanPlugin] 处理投票消息失败: {e}")
 
-    async def handle_vote_response(
-        self, event: AiocqhttpMessageEvent, is_good: bool
+    async def handle_vote_response_raw(
+        self, group_id: str, voter_id: str, is_good: bool
     ) -> None:
-        """处理投票响应（好/不好）
+        """处理投票响应（原始参数）
 
         Args:
-            event: 消息事件对象
+            group_id: 群号
+            voter_id: 投票用户ID
             is_good: True 表示"好"，False 表示"不好"
         """
         try:
-            voter_id = event.get_sender_id()
-            group_id = event.get_group_id()
-
             if not group_id or not voter_id:
                 return
 

@@ -85,8 +85,30 @@ class MuteHandler:
                 f"[LuwanPlugin] 用户 {user_id} 在群 {group_id} 自愿被禁言 {duration_minutes} 分钟"
             )
 
+            await event.bot.send_group_msg(
+                group_id=int(group_id),
+                message=[
+                    {"type": "at", "data": {"qq": int(user_id)}},
+                    {
+                        "type": "text",
+                        "data": {
+                            "text": Messages.get(
+                                "mute.success.mute_me", duration=duration_minutes
+                            )
+                        },
+                    },
+                ],
+            )
+
         except Exception as e:
             logger.warning(f"[LuwanPlugin] 禁言失败: {e}")
+            try:
+                await event.bot.send_group_msg(
+                    group_id=int(group_id),
+                    message=Messages.get("mute.error.failed"),
+                )
+            except Exception:
+                pass
 
     async def handle_mute_request(self, event: AiocqhttpMessageEvent) -> None:
         """处理禁言投票请求

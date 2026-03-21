@@ -176,7 +176,8 @@
       "cannot_mute_admin": "❌ 不能禁言管理员",
       "cannot_mute_owner": "❌ 不能禁言群主",
       "admin_cannot_mute_self": "❌ 管理员不能禁言自己",
-      "owner_cannot_mute_self": "❌ 群主不能禁言自己"
+      "owner_cannot_mute_self": "❌ 群主不能禁言自己",
+      "initiator_cooldown": "❌ 您发起投票太频繁，请等待 {remaining} 秒后再试"
     },
     "success": {
       "mute_me": "✅ 你已被禁言 {duration} 分钟"

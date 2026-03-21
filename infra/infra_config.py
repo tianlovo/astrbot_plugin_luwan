@@ -320,6 +320,12 @@ class LuwanConfig:
         mute = self.get("mute", {})
         return mute.get("target_cooldown", 60)
 
+    @property
+    def mute_initiator_cooldown(self) -> int:
+        """发起者冷却时间（秒）"""
+        mute = self.get("mute", {})
+        return mute.get("initiator_cooldown", 300)
+
     def is_admin(self, user_id: str) -> bool:
         """检查用户是否为管理员
 

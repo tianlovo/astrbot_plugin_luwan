@@ -49,6 +49,7 @@ class MuteHandler:
         self.config = config
         self._vote_sessions: dict[str, MuteVoteSession] = {}
         self._target_cooldown: dict[str, float] = {}
+        self._initiator_cooldown: dict[str, float] = {}
 
     def _get_vote_key(self, group_id: str, message_id: int) -> str:
         return f"{group_id}:{message_id}"
@@ -155,6 +156,32 @@ class MuteHandler:
 
             if group_id not in self.config.mute_enabled_groups:
                 return
+
+            # 检查发起者冷却状态
+            initiator_cooldown_key = f"{group_id}:{initiator_id}"
+            current_time = time.time()
+            if initiator_cooldown_key in self._initiator_cooldown:
+                last_initiate_time = self._initiator_cooldown[initiator_cooldown_key]
+                elapsed = current_time - last_initiate_time
+                if elapsed < self.config.mute_initiator_cooldown:
+                    remaining = int(self.config.mute_initiator_cooldown - elapsed)
+                    logger.info(
+                        f"[LuwanPlugin] 发起者 {initiator_id} 在冷却期内，拒绝禁言投票"
+                    )
+                    await event.bot.send_group_msg(
+                        group_id=int(group_id),
+                        message=[
+                            {
+                                "type": "text",
+                                "data": {
+                                    "text": Messages.get(
+                                        "mute.error.initiator_cooldown", remaining=remaining
+                                    )
+                                },
+                            },
+                        ],
+                    )
+                    return
 
             messages = event.get_messages()
             at_components = [comp for comp in messages if isinstance(comp, At)]
@@ -265,6 +292,9 @@ class MuteHandler:
                 bot=event.bot,
             )
             self._vote_sessions[vote_key] = session
+
+            # 记录发起者冷却时间
+            self._initiator_cooldown[initiator_cooldown_key] = current_time
 
             asyncio.create_task(self._wait_for_vote_result(vote_key))
 

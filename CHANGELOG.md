@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.7.17] - 2025-03-21
+
+### Added
+
+- feat(mute): 添加禁言投票发起者冷却机制
+- feat(mute): 新增发起者冷却时间配置（默认5分钟）
+- feat(mute): 同一用户在冷却期内无法再次发起禁言投票
+- feat(mute): 冷却期间发起投票会发送反馈提示
+
 ## [v1.7.16] - 2025-03-21
 
 ### Added

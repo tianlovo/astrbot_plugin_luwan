@@ -13,7 +13,7 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
     AiocqhttpMessageEvent,
 )
 
-from ..infra import LuwanConfig
+from ..infra import LuwanConfig, Messages
 
 
 @dataclass
@@ -147,7 +147,16 @@ class MuteHandler:
                     )
                     await event.bot.send_group_msg(
                         group_id=int(group_id),
-                        message=f"❌ 该用户正在禁言冷却中，请 {remaining} 秒后再试",
+                        message=[
+                            {
+                                "type": "text",
+                                "data": {
+                                    "text": Messages.get(
+                                        "mute.error.cooldown", remaining=remaining
+                                    )
+                                },
+                            },
+                        ],
                     )
                     return
 
@@ -169,12 +178,15 @@ class MuteHandler:
                 group_id=int(group_id),
                 message=[
                     {"type": "at", "data": {"qq": int(initiator_id)}},
-                    {"type": "text", "data": {"text": " 发起了投票，各位是否要禁言 "}},
+                    {
+                        "type": "text",
+                        "data": {"text": Messages.get("mute.vote.initiator_at")},
+                    },
                     {"type": "at", "data": {"qq": int(target_user_id)}},
                     {
                         "type": "text",
                         "data": {
-                            "text": f"？\n{self.config.mute_vote_duration}秒内发送「好」或「不好」来参与投票吧~"
+                            "text": f"？\n{Messages.get('mute.vote.prompt', duration=self.config.mute_vote_duration)}"
                         },
                     },
                 ],
@@ -362,16 +374,25 @@ class MuteHandler:
                     f"[LuwanPlugin] 投票通过，禁言用户 {session.target_user_id} 在群 {session.group_id}"
                 )
 
-                result_message = f"投票结束！同意票({good_count}) > 反对票({bad_count})，执行禁言「{session.target_name}」"
+                result_message = Messages.get(
+                    "mute.vote.result_pass",
+                    good_count=good_count,
+                    bad_count=bad_count,
+                    target_name=session.target_name,
+                )
             except Exception as e:
                 logger.warning(f"[LuwanPlugin] 执行禁言失败: {e}")
-                result_message = f"投票结束！同意票({good_count}) > 反对票({bad_count})，但禁言执行失败"
+                result_message = Messages.get(
+                    "mute.vote.result_pass_failed",
+                    good_count=good_count,
+                    bad_count=bad_count,
+                )
         else:
             logger.info(
                 f"[LuwanPlugin] 投票未通过，不执行禁言 | 好:{good_count} 不好:{bad_count}"
             )
-            result_message = (
-                f"投票结束！同意票({good_count}) <= 反对票({bad_count})，不执行禁言"
+            result_message = Messages.get(
+                "mute.vote.result_reject", good_count=good_count, bad_count=bad_count
             )
 
         try:

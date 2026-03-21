@@ -71,8 +71,9 @@ class TestHandler:
                 title="桑多涅 Jeb Nid Nid 【原神MMD】",
                 desc="桑多涅 Jeb Nid Nid 【原神MMD】",
                 picUrl="",
-                jumpUrl="https://www.bilibili.com/video/BV1FAcfzJE3Q",
-                webUrl="https://www.bilibili.com/video/BV1FAcfzJE3Q",
+                jumpUrl="https://b23.tv/0c4wS4f",
+                # webUrl="https://www.bilibili.com/video/BV1FAcfzJE3Q",
+                rawArkData=False,
             )
 
             json_data = result.get("data", {})

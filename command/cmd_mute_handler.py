@@ -73,7 +73,16 @@ class MuteHandler:
                 return
 
             # 检查用户身份，管理员和群主不能禁言自己
-            user_role = event.sender.get("role", "member")
+            user_role = "member"
+            try:
+                member_info = await event.bot.get_group_member_info(
+                    group_id=int(group_id), user_id=int(user_id)
+                )
+                if member_info:
+                    user_role = member_info.get("role", "member")
+            except Exception:
+                pass
+
             if user_role == "admin":
                 await event.bot.send_group_msg(
                     group_id=int(group_id),

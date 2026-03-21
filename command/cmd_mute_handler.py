@@ -347,12 +347,13 @@ class MuteHandler:
 
             logger.info(f"[MuteHandler] 清理后文本: '{cleaned_text}'")
 
-            if cleaned_text == "好" or message_text == "好":
-                logger.info(f"[MuteHandler] 检测到'好'投票 | 用户:{user_id}")
-                await self.handle_vote_response_raw(group_id, user_id, is_good=True)
-            elif cleaned_text == "不好" or message_text == "不好":
+            # 检查是否以"好"或"不好"开头（支持@机器人后的投票）
+            if cleaned_text.startswith("不好") or message_text.startswith("不好"):
                 logger.info(f"[MuteHandler] 检测到'不好'投票 | 用户:{user_id}")
                 await self.handle_vote_response_raw(group_id, user_id, is_good=False)
+            elif cleaned_text.startswith("好") or message_text.startswith("好"):
+                logger.info(f"[MuteHandler] 检测到'好'投票 | 用户:{user_id}")
+                await self.handle_vote_response_raw(group_id, user_id, is_good=True)
         except Exception as e:
             logger.warning(f"[LuwanPlugin] 处理投票消息失败: {e}", exc_info=True)
 

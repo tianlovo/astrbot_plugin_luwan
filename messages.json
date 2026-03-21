@@ -172,7 +172,11 @@
   "mute": {
     "error": {
       "cooldown": "❌ 该用户正在禁言冷却中，请 {remaining} 秒后再试",
-      "failed": "❌ 禁言失败，请稍后重试"
+      "failed": "❌ 禁言失败，请稍后重试",
+      "cannot_mute_admin": "❌ 不能禁言管理员",
+      "cannot_mute_owner": "❌ 不能禁言群主",
+      "admin_cannot_mute_self": "❌ 管理员不能禁言自己",
+      "owner_cannot_mute_self": "❌ 群主不能禁言自己"
     },
     "success": {
       "mute_me": "✅ 你已被禁言 {duration} 分钟"

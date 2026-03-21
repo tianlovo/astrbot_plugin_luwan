@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/spec/v2.0.0.html).
 
+## [v1.7.16] - 2025-03-21
+
+### Added
+
+- feat(mute): 添加管理员和群主保护机制
+- feat(mute): 禁言我功能拒绝管理员和群主禁言自己
+- feat(mute): 禁言投票功能拒绝将管理员和群主作为目标
+
 ## [v1.7.15] - 2025-03-20
 
 ### Fixed

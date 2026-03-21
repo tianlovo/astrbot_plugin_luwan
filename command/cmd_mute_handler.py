@@ -72,6 +72,21 @@ class MuteHandler:
             if group_id not in self.config.mute_enabled_groups:
                 return
 
+            # 检查用户身份，管理员和群主不能禁言自己
+            user_role = event.sender.get("role", "member")
+            if user_role == "admin":
+                await event.bot.send_group_msg(
+                    group_id=int(group_id),
+                    message=Messages.get("mute.error.admin_cannot_mute_self"),
+                )
+                return
+            if user_role == "owner":
+                await event.bot.send_group_msg(
+                    group_id=int(group_id),
+                    message=Messages.get("mute.error.owner_cannot_mute_self"),
+                )
+                return
+
             duration_minutes = self.config.mute_duration
             duration_seconds = duration_minutes * 60
 
@@ -144,6 +159,7 @@ class MuteHandler:
                 return
 
             target_name = target_user_id
+            target_role = "member"
             try:
                 member_info = await event.bot.get_group_member_info(
                     group_id=int(group_id), user_id=int(target_user_id)
@@ -154,8 +170,23 @@ class MuteHandler:
                         or member_info.get("nickname")
                         or target_user_id
                     )
+                    target_role = member_info.get("role", "member")
             except Exception:
                 pass
+
+            # 检查目标用户身份，不能禁言管理员和群主
+            if target_role == "admin":
+                await event.bot.send_group_msg(
+                    group_id=int(group_id),
+                    message=Messages.get("mute.error.cannot_mute_admin"),
+                )
+                return
+            if target_role == "owner":
+                await event.bot.send_group_msg(
+                    group_id=int(group_id),
+                    message=Messages.get("mute.error.cannot_mute_owner"),
+                )
+                return
 
             cooldown_key = f"{group_id}:{target_user_id}"
             current_time = time.time()
